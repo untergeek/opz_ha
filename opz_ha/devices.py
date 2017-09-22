@@ -8,14 +8,6 @@ REFRESH = 0.1
 
 logger = logging.getLogger(__name__)
 
-def on_message(client, userdata, message):
-    try:
-        logger.debug('message received: {0}'.format(message.payload))
-        logger.debug('message topic: {0}'.format(message.topic))
-        logger.debug('message qos: {0}'.format(message.qos))
-        logger.debug('message retain flag: {0}'.format(message.retain))
-    except Exception as e:
-        logger.error('Exception: {0}'.format(e))
 
 class GDORelay(object):
     def __init__(self, client, relay, topic, qos=2):
@@ -31,8 +23,15 @@ class GDORelay(object):
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
 
+    def on_message(client, userdata, message):
+        self.logger.debug('message received: {0}'.format(message.payload))
+        self.logger.debug('message topic: {0}'.format(message.topic))
+        self.logger.debug('message qos: {0}'.format(message.qos))
+        self.logger.debug('message retain flag: {0}'.format(message.retain))
+        self.logger.error('Exception: {0}'.format(e))
+
     def get_state(self):
-        self.mqttc.on_message = on_message
+        self.mqttc.on_message = self.on_message
         self.mqttc.subscribe(self.topic, self.qos)
 
     def buttonmash(self):
