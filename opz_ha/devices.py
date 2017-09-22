@@ -51,6 +51,7 @@ class ReedSwitch(object):
         self.mqttc = client
         # switch is port.XX## or connector.gpio#p#
         self.topic = topic
+        self.interval = interval
         self.qos = qos
         self.retain = retain
         # Set directions
@@ -66,7 +67,7 @@ class ReedSwitch(object):
         read_state.start()
         # Start background periodic publishing daemon thread
         self.logger.info('Start thread to publish current state of GPIO{0} to topic "{1}" every {2} seconds'.format(switch, topic, interval))
-        at_interval = threading.Thread(target=self.publish, args=interval)
+        at_interval = threading.Thread(target=self.publish, args=())
         at_interval.daemon = True                           # Daemonize thread
         at_interval.start()
 
@@ -82,11 +83,11 @@ class ReedSwitch(object):
                 self.prev = self.curr
             time.sleep(refresh)
 
-    def publish(self, interval):
+    def publish(self):
         time.sleep(1) # Wait one second from initialization before continuing
         while True:
-            self.logger.debug('Publish: sleeping for {0} seconds'.format(interval))
-            time.sleep(interval)
+            self.logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
+            time.sleep(self.interval)
             self.logger.debug('Publish: sending state...')
             self.send_state()
 
