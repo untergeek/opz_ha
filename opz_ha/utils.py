@@ -93,6 +93,6 @@ def set_logging(log_dict):
                 handler.addFilter(Blacklist(bl_entry))
 
 def process_config(yaml_file):
-    config = utils.get_yaml(yaml_file)
+    config = get_yaml(yaml_file)
     set_logging(config['logging'])
     return config

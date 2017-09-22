@@ -1,6 +1,6 @@
 import time, threading, logging
 from pyA20.gpio import gpio
-from .utils import *
+from . import utils
 
 gpio.init()
 INTERVAL = 120
@@ -22,12 +22,12 @@ class OneWire(object):
             starttime = time.time()
             for topic in topics:
                 for device in topic['devices']:
-                    rawtemp = read_sensor(_1wire_path(device['family'], device['id'], device['filename'])) 
+                    rawtemp = utils.read_sensor(utils._1wire_path(device['family'], device['id'], device['filename'])) 
                     if rawtemp == None:
                         # In case we have a failure, or the device was removed, wait...
                         time.sleep(1.5)
                         continue
-                    formatted_temp = fahrtigrade(rawtemp, device['temp_scale'] if 'temp_scale' in device else 'C')
+                    formatted_temp = utils.fahrtigrade(rawtemp, device['temp_scale'] if 'temp_scale' in device else 'C')
                     self.send_state(
                         '{0}/{1}'.format(topic['topic_trunk'], device['topic_leaf']), 
                         '{0:.2f}'.format(formatted_temp), 
