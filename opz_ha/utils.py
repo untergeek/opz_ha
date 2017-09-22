@@ -50,34 +50,38 @@ def get_yaml(path):
     return cfg
 
 def now():
+    logger.debug('{0} called'.format(__name__))
     return '{0}'.format(int(time.time()))
 
 def read_sensor(path):
-  value = None
-  try:
-      f = open(path, "r")
-      line = f.readline()
-      if re.match(r"([0-9a-f]{2} ){9}: crc=[0-9a-f]{2} YES", line):
+    logger.debug('{0} called'.format(__name__))
+    value = None
+    try:
+        f = open(path, "r")
         line = f.readline()
-        m = re.match(r"([0-9a-f]{2} ){9}t=([+-]?[0-9]+)", line)
-        if m:
-          value = float(m.group(2)) / 1000.0
-      f.close()
-  except IOError as e:
-      logger.error('Unable to read: {0}.  Error: {1}'.format(path, e))
-  # Since we are ostensibly reading regular human dwelling temperatures, 
-  # and errors often read -69, this should help reduce the likelihood
-  # of encountering those.
-  logger.debug('value at path {0} = {1} ºC'.format(path, value))
-  if value:
-      if value > 55.0 or value < -55.0:
-          return None
-  return value
+        if re.match(r"([0-9a-f]{2} ){9}: crc=[0-9a-f]{2} YES", line):
+          line = f.readline()
+          m = re.match(r"([0-9a-f]{2} ){9}t=([+-]?[0-9]+)", line)
+          if m:
+            value = float(m.group(2)) / 1000.0
+        f.close()
+    except IOError as e:
+        logger.error('Unable to read: {0}.  Error: {1}'.format(path, e))
+    # Since we are ostensibly reading regular human dwelling temperatures, 
+    # and errors often read -69, this should help reduce the likelihood
+    # of encountering those.
+    logger.debug('value at path {0} = {1} ºC'.format(path, value))
+    if value:
+        if value > 55.0 or value < -55.0:
+            return None
+    return value
 
 def _1wire_path(family, _id, filename):
+    logger.debug('{0} called'.format(__name__))
     return '/sys/bus/w1/devices/{0}-{1}/{2}'.format(family, _id, filename)
 
 def fahrtigrade(value, scale='C'):
+    logger.debug('{0} called'.format(__name__))
     if scale == 'C':
         return value
     else:
