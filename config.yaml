@@ -1,0 +1,60 @@
+---
+mqtt:
+  user: homeassistant
+  password: spanky_jones
+  host: 172.19.73.28
+  port: 1883
+  keepalive: 30
+  client_id: opz1_ha
+logging:
+  loglevel: INFO
+  logfile:
+  logformat: default
+reed_switches:
+  - topic: opz1/reed_switches/freezer_door
+    gpio_port: PA12
+    gpio_pin: 3
+    qos: 0
+    retain: true
+    interval: 120
+    refresh: 0.1
+  - topic: opz1/reed_switches/garage_door
+    gpio_port: PA11
+    gpio_pin: 5
+    qos: 0
+    retain: true
+    interval: 120
+    refresh: 0.1
+onewire:
+  interval: 120
+  topics:
+    - topic_trunk: steiny/1wire
+      devices: 
+        - topic_leaf: house_front
+          family: 28
+          id: 0516a04747ff
+          filename: w1_slave
+          qos: 0
+          retain: true
+          temp_scale: F
+        - topic_leaf: garage_high
+          family: 28
+          id: 03168cf595ff
+          filename: w1_slave
+          qos: 0
+          retain: true
+          temp_scale: F
+        - topic_leaf: cold_storage
+          family: 28
+          id: 0416a157d2ff
+          filename: w1_slave
+          qos: 0
+          retain: true
+          temp_scale: F
+        - topic_leaf: office
+          family: 28
+          id: 0316a1e23dff
+          filename: w1_slave
+          qos: 0
+          retain: true
+          temp_scale: F

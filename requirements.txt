@@ -1,0 +1,5 @@
+pyyaml>=3.10
+paho-mqtt
+pyA20
+click
+python-daemon
