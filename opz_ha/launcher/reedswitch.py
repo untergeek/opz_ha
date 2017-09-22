@@ -1,4 +1,4 @@
-import time, threading, logging
+import time, threading, logging, sys
 # import paho.mqtt.client as mqtt
 from pyA20.gpio import gpio, connector, port
 from ..devices import OneWire, ReedSwitch
