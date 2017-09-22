@@ -28,7 +28,6 @@ class GDORelay(object):
         self.logger.debug('message topic: {0}'.format(message.topic))
         self.logger.debug('message qos: {0}'.format(message.qos))
         self.logger.debug('message retain flag: {0}'.format(message.retain))
-        self.logger.error('Exception: {0}'.format(e))
 
     def get_state(self):
         self.mqttc.on_message = self.on_message
