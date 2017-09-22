@@ -6,11 +6,10 @@ gpio.init()
 INTERVAL = 120
 REFRESH = 0.1
 
-logger = logging.getLogger(__name__)
 
 class OneWire(object):
     def __init__(self, client, topics, interval=120):
-        logger = logging.getLogger('opz_ha.devices.OneWire')
+        self.logger = logging.getLogger('opz_ha.devices.OneWire')
         # client is mqtt client
         self.mqttc = client
         # Start background realtime read/report daemon thread
@@ -39,14 +38,14 @@ class OneWire(object):
             time.sleep(float(interval - (time.time() - starttime)))
 
     def send_state(self, topic, payload, qos, retain):
-        logger.debug('{0} will receive "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
+        self.logger.debug('{0} will receive "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
         tupleme = self.mqttc.publish(topic, payload, qos, retain)
         logger.debug('MQTT Response: {0}'.format(tupleme))
 
 
 class ReedSwitch(object):
     def __init__(self, client, switch, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
-        logger = logging.getLogger('opz_ha.devices.ReedSwitch')
+        self.logger = logging.getLogger('opz_ha.devices.ReedSwitch')
         # client is mqtt client
         self.mqttc = client
         # switch is port.XX## or connector.gpio#p#
@@ -86,14 +85,14 @@ class ReedSwitch(object):
     def publish(self):
         time.sleep(1) # Wait one second from initialization before continuing
         while True:
-            logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
+            self.logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
             time.sleep(self.interval)
-            logger.debug('Publish: sending state...')
+            self.logger.debug('Publish: sending state...')
             self.send_state()
 
     def send_state(self):
         state = 'open' if self.curr else 'closed'
-        logger.debug('{0} is {1}'.format(self.topic, state))
+        self.logger.debug('{0} is {1}'.format(self.topic, state))
         if self.curr != None:
             tupleme = self.mqttc.publish(self.topic, payload=self.curr, qos=self.qos, retain=self.retain)
-            logger.debug('MQTT Response: {0}'.format(tupleme))
+            self.logger.debug('MQTT Response: {0}'.format(tupleme))
