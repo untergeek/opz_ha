@@ -60,13 +60,13 @@ class ReedSwitch(object):
         self.curr = None
         self.prev = None
         # Start background realtime read/report daemon thread
-        self.logger.info('Starting realtime monitoring thread for reed switch at GPIO "{0}"'.format(switch))
+        self.logger.info('Starting reed switch monitoring of GPIO{0} for topic "{1}"'.format(switch, topic))
         read_state = threading.Thread(target=self.get_state, args=(switch, refresh))
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
         # Start background periodic publishing daemon thread
-        self.logger.info('Start thread to publish current value for reed switch at GPIO "{0}" every {1} seconds'.format(switch, interval))
-        at_interval = threading.Thread(target=self.publish, args=(interval))
+        self.logger.info('Start thread to publish current state of GPIO{0} to topic "{1}" every {2} seconds'.format(switch, topic, interval))
+        at_interval = threading.Thread(target=self.publish, args=interval)
         at_interval.daemon = True                           # Daemonize thread
         at_interval.start()
 
