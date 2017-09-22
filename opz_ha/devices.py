@@ -6,6 +6,35 @@ gpio.init()
 INTERVAL = 120
 REFRESH = 0.1
 
+class GDORelay(object):
+    def __init__(self, client, relay, topic, qos=2):
+        self.logger = logging.getLogger('opz_ha.devices.GDORelay')
+        # client is mqtt client
+        self.mqttc = client
+        self.relay = relay
+        self.topic = topic
+        self.qos = qos
+        # Start background realtime read/report daemon thread
+        self.logger.info('Starting GDO relay monitoring thread')
+        read_state = threading.Thread(target=self.get_state, args=())
+        read_state.daemon = True                            # Daemonize thread
+        read_state.start()
+
+    def on_message(self, client, userdata, message):
+        logger.debug('message received: {0}'.format(message.payload))
+        logger.debug('message topic: {0}'.format(message.topic))
+        logger.debug('message qos: {0}'.format(message.qos))
+        logger.debug('message retain flag: {0}'.format(message.retain))
+
+    def get_state(self):
+        self.mqttc.on_message=self.on_message
+        self.mqttc.subscribe(self.topic, self.qos)
+
+    def buttonmash(self):
+        gpio.output(self.relay, gpio.HIGH)
+        time.sleep(0.5)
+        gpio.output(self.relay, gpio.LOW)
+
 
 class OneWire(object):
     def __init__(self, client, topics, interval=120):
