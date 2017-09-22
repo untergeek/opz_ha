@@ -15,7 +15,7 @@ def constructor(*a, **k):
 def get_gpio_func(kind, val):
     return getattr(sys.modules['pyA20.gpio.{0}'.format(kind)],val)
 
-def launcher(relays, client_id, username, password, hostname, port, keepalive):
+def launcher(mqttc, relays):
     """
     gdo_relay:
       - topic: opz1/gdo/main
@@ -40,7 +40,7 @@ def launcher(relays, client_id, username, password, hostname, port, keepalive):
         logger.debug('Spawning thread to read topic {0} and issue commands to relay at GPIO{1}'.format(topic, relay))
         thread = threading.Thread(
             target=constructor, 
-            args=(relay, topic, client_id, username, password, hostname, port, keepalive), 
+            args=(mqttc, relay, topic), 
             kwargs={ 'qos':qos },
             name='gdorelay-{0}'.format(threadnum)
         )
