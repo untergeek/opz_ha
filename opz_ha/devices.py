@@ -3,6 +3,8 @@ from pyA20.gpio import gpio
 from . import utils
 
 gpio.init()
+INTERVAL = 120
+REFRESH = 0.1
 
 logger = logging.getLogger(__name__)
 
