@@ -13,6 +13,7 @@ class OneWire(object):
         # client is mqtt client
         self.mqttc = client
         # Start background realtime read/report daemon thread
+        self.logger.info('Starting 1-wire monitoring thread, collecting values every {0} seconds'.format(interval))
         read_state = threading.Thread(target=self.get_state, args=(topics, interval))
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
@@ -38,9 +39,9 @@ class OneWire(object):
             time.sleep(float(interval - (time.time() - starttime)))
 
     def send_state(self, topic, payload, qos, retain):
-        self.logger.debug('{0} will receive "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
+        self.logger.debug('Topic {0} will receive payload "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
         tupleme = self.mqttc.publish(topic, payload, qos, retain)
-        self.logger.debug('MQTT Response: {0}'.format(tupleme))
+        self.logger.debug('MQTT Response tuple: {0}'.format(tupleme))
 
 
 class ReedSwitch(object):
@@ -49,12 +50,9 @@ class ReedSwitch(object):
         # client is mqtt client
         self.mqttc = client
         # switch is port.XX## or connector.gpio#p#
-        self.switch = switch
         self.topic = topic
         self.qos = qos
         self.retain = retain
-        self.interval = interval
-        self.refresh = refresh
         # Set directions
         gpio.setcfg(switch, gpio.INPUT)
         # Enable pullup resistor
@@ -62,17 +60,19 @@ class ReedSwitch(object):
         self.curr = None
         self.prev = None
         # Start background realtime read/report daemon thread
-        read_state = threading.Thread(target=self.get_state, args=())
+        self.logger.info('Starting realtime monitoring thread for reed switch at GPIO "{0}"'.format(switch))
+        read_state = threading.Thread(target=self.get_state, args=(switch, refresh))
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
         # Start background periodic publishing daemon thread
-        at_interval = threading.Thread(target=self.publish, args=())
+        self.logger.info('Start thread to publish current value for reed switch at GPIO "{0}" every {1} seconds'.format(switch, interval))
+        at_interval = threading.Thread(target=self.publish, args=(interval))
         at_interval.daemon = True                           # Daemonize thread
         at_interval.start()
 
-    def get_state(self):
+    def get_state(self, switch, refresh):
         while True:
-            self.curr = gpio.input(self.switch)      # Read switch state
+            self.curr = gpio.input(switch)      # Read switch state
             if self.prev is None:
                 self.prev = self.curr
                 self.send_state()
@@ -80,19 +80,19 @@ class ReedSwitch(object):
                 # We're only sending values here if they've changed
                 self.send_state()
                 self.prev = self.curr
-            time.sleep(self.refresh)
+            time.sleep(refresh)
 
-    def publish(self):
+    def publish(self, interval):
         time.sleep(1) # Wait one second from initialization before continuing
         while True:
-            self.logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
-            time.sleep(self.interval)
+            self.logger.debug('Publish: sleeping for {0} seconds'.format(interval))
+            time.sleep(interval)
             self.logger.debug('Publish: sending state...')
             self.send_state()
 
     def send_state(self):
         state = 'open' if self.curr else 'closed'
-        self.logger.debug('{0} is {1}'.format(self.topic, state))
+        self.logger.debug('Reporting topic {0} as {1}'.format(self.topic, state))
         if self.curr != None:
             tupleme = self.mqttc.publish(self.topic, payload=self.curr, qos=self.qos, retain=self.retain)
-            self.logger.debug('MQTT Response: {0}'.format(tupleme))
+            self.logger.debug('MQTT Response tuple: {0}'.format(tupleme))
