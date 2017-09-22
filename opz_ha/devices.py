@@ -23,17 +23,17 @@ class GDORelay(object):
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
 
-    def on_message(self, client, userdata, message):
-        self.logger.debug('message received: {0}'.format(message.payload))
-        self.logger.debug('message topic: {0}'.format(message.topic))
-        self.logger.debug('message qos: {0}'.format(message.qos))
-        self.logger.debug('message retain flag: {0}'.format(message.retain))
+    def on_message(self, client, obj, m):
+        self.logger.debug('topic: {0}, payload: {1}, qos: {2}, retain: {3}'.format(m.topic, m.payload, m.qos, m.retain))
+        if m.topic == self.topic:
+            if m.payload == b'on' or m.payload == b'off':
+                self.toggleRelay()
 
     def get_state(self):
         self.mqttc.on_message = self.on_message
         self.mqttc.subscribe(self.topic, self.qos)
 
-    def buttonmash(self):
+    def toggleRelay(self):
         gpio.output(self.relay, gpio.HIGH)
         time.sleep(0.5)
         gpio.output(self.relay, gpio.LOW)
