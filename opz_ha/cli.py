@@ -17,9 +17,15 @@ if not os.getegid() == 0:
     sys.exit('opz_ha must be run as root')
 
 def run(config):
-    mqttc = mqtt.Client(client_id=config['mqtt']['client_id'])
-    mqttc.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
-    mqttc.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
+    client_id = config['mqtt']['client_id']
+    username  = config['mqtt']['user']
+    password  = config['mqtt']['password']
+    hostname  = config['mqtt']['host']
+    port      = config['mqtt']['port']
+    keepalive = config['mqtt']['keepalive']
+    mqttc = mqtt.Client(client_id)
+    mqttc.username_pw_set(username, password=password)
+    mqttc.connect(hostname, port=port, keepalive=keepalive)
     mqttc.loop_start()
     if 'reed_switches' in config:
         i = config['reed_switches']['interval'] if 'interval' in config['reed_switches'] else INTERVAL
@@ -28,7 +34,7 @@ def run(config):
     if 'onewire' in config:
         onewire.launcher(mqttc, config['onewire'])
     if 'gdo_relays' in config:
-        gdorelay.launcher(mqttc, config['gdo_relays'])
+        gdorelay.launcher(config['gdo_relays'], client_id, username, password, hostname, port, keepalive)
     return mqttc
 
 

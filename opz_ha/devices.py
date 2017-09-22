@@ -8,20 +8,17 @@ REFRESH = 0.1
 
 logger = logging.getLogger(__name__)
 
-def on_message(client, userdata, message):
-    try:
-        logger.debug('message received: {0}'.format(message.payload))
-        logger.debug('message topic: {0}'.format(message.topic))
-        logger.debug('message qos: {0}'.format(message.qos))
-        logger.debug('message retain flag: {0}'.format(message.retain))
-    except Exception as e:
-        logger.error('Exception: {0}'.format(e))
 
 class GDORelay(object):
-    def __init__(self, client, relay, topic, qos=2):
+    def __init__(self, relay, topic, client_id, username, password, hostname, port, keepalive, qos=2):
         self.logger = logging.getLogger('opz_ha.devices.GDORelay')
-        # client is mqtt client
-        self.mqttc = client
+        self.mqttc = mqtt.Client(client_id)
+        self.mqttc.username_pw_set(username, password=password)
+        self.mqttc.on_connect = self.on_connect
+        self.mqttc.on_message = self.on_message
+        self.hostname = hostname
+        self.port = port
+        self.keepalive = keepalive
         self.relay = relay
         self.topic = topic
         self.qos = qos
@@ -31,11 +28,22 @@ class GDORelay(object):
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
 
+    def on_connect(self, client, obj, flags, rc):
+        self.mqttc.subscribe(self.topic, self.qos)
 
+    def on_message(self, client, userdata, message):
+        try:
+            self.logger.debug('message received: {0}'.format(message.payload))
+            self.logger.debug('message topic: {0}'.format(message.topic))
+            self.logger.debug('message qos: {0}'.format(message.qos))
+            self.logger.debug('message retain flag: {0}'.format(message.retain))
+        except Exception as e:
+            self.logger.error('Exception: {0}'.format(e))
 
     def get_state(self):
-        self.mqttc.on_message = on_message
-        self.mqttc.subscribe(self.topic, self.qos)
+        self.logger.info('Monitoring topic {0} for changes...'.format(self.topic))
+        self.mqttc.connect(self.hostname, port=self.port, keepalive=self.keepalive)
+        self.mqttc.loop_start()
 
     def buttonmash(self):
         gpio.output(self.relay, gpio.HIGH)
