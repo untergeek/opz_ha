@@ -15,17 +15,6 @@ REFRESH = 0.1
 if not os.getegid() == 0:
     sys.exit('opz_ha must be run as root')
 
-def foreground(func):
-    def wrapper(*args):
-        print('Press CTRL+C to exit')
-        func(*args)
-        try:
-            while True:
-                time.sleep(1) 
-        except KeyboardInterrupt:
-            print ('Goodbye.')
-    return wrapper
-
 def run(config):
     mqttc = mqtt.Client(client_id=config['mqtt']['client_id'])
     mqttc.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
@@ -61,6 +50,11 @@ def cli(configuration_file, daemonize):
             mqttc = run(config)
     else:
         logger.info('Running in foreground...')
-        mqttc = foreground(run(config))
+        mqttc = run(config)
+        try:
+            while True:
+                time.sleep(1) 
+        except KeyboardInterrupt:
+            print ('Goodbye.')
     mqttc.loop_stop()
 
