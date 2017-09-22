@@ -16,9 +16,9 @@ if not os.getegid() == 0:
     sys.exit('opz_ha must be run as root')
 
 def foreground(func):
-    def wrapper():
+    def wrapper(*args):
         print('Press CTRL+C to exit')
-        func()
+        func(*args)
         try:
             while True:
                 time.sleep(1) 
