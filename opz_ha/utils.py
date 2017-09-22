@@ -1,7 +1,6 @@
 import yaml, os, re, sys, time, logging
 from .logtools import LogInfo, Whitelist, Blacklist
 
-gpio.init()
 logger = logging.getLogger(__name__)
 
 def read_file(myfile):
