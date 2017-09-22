@@ -54,7 +54,7 @@ def now():
     return '{0}'.format(int(time.time()))
 
 def read_sensor(path):
-    logger.debug('Function called.')
+    logger.debug('Testing path "{0}"'.format(path))
     value = None
     try:
         f = open(path, "r")
@@ -77,11 +77,11 @@ def read_sensor(path):
     return value
 
 def _1wire_path(family, _id, filename):
-    logger.debug('Function called.')
+    logger.debug('family = "{0}", _id = "{1}", filename = "{2}"'.format(family, _id, filename))
     return '/sys/bus/w1/devices/{0}-{1}/{2}'.format(family, _id, filename)
 
 def fahrtigrade(value, scale='C'):
-    logger.debug('Function called.')
+    logger.debug('Scale = {0}, value = {1}'.format(scale, value))
     if scale == 'C':
         return value
     else:
