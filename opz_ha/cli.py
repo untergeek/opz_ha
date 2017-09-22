@@ -41,10 +41,7 @@ def run(config):
 
 
 @click.command()
-@click.argument('configuration_file',
-    help="Path to YAML configuration file.",
-    type=click.Path(exists=True)
-)
+@click.argument('configuration_file', type=click.Path(exists=True))
 @click.option('--daemonize', is_flag=True)
 @click.version_option(version=__version__)
 def cli(configuration_file, daemonize):
