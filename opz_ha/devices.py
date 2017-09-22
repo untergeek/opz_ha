@@ -26,7 +26,7 @@ class GDORelay(object):
     def on_message(self, client, obj, m):
         self.logger.debug('topic: {0}, payload: {1}, qos: {2}, retain: {3}'.format(m.topic, m.payload, m.qos, m.retain))
         if m.topic == self.topic:
-            if m.payload == b'on' or m.payload == b'off':
+            if m.payload == b'OPEN' or m.payload == b'CLOSE' or m.payload == b'STOP':
                 self.toggleRelay()
 
     def get_state(self):
