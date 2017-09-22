@@ -39,7 +39,7 @@ class OneWire(object):
 
     def send_state(self, topic, payload, qos, retain):
         logger.debug('{0} will receive "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
-        tupleme = self.mqttc.publish(self.topic, payload, qos, retain)
+        tupleme = self.mqttc.publish(topic, payload, qos, retain)
         logger.debug('Response: {0}'.format(tupleme))
 
 
@@ -84,14 +84,14 @@ class ReedSwitch(object):
     def publish(self):
         time.sleep(1) # Wait one second from initialization before continuing
         while True:
-            logger.debug('Publish: sleeping for {1} seconds'.format(self.interval))
+            logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
             time.sleep(self.interval)
             logger.debug('Publish: sending state...')
             self.send_state()
 
     def send_state(self):
         state = 'open' if self.curr else 'closed'
-        logger.debug('{0}: {1} is {2}'.format(now(), self.topic, state))
+        logger.debug('{0} is {1}'.format(self.topic, state))
         if self.curr != None:
             tupleme = self.mqttc.publish(self.topic, payload=self.curr, qos=self.qos, retain=self.retain)
             logger.debug('Response: {0}'.format(tupleme))
