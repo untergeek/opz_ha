@@ -34,14 +34,17 @@ class Blacklist(Whitelist):
         return not Whitelist.filter(self, record)
 
 class LogInfo(object):
-    def __init__(self, loglevel='INFO', logfile=None, logformat='default'):
-        self.numeric_log_level = getattr(logging, loglevel.upper(), None)
+    def __init__(self, cfg):
+        cfg['loglevel'] = 'INFO' if not 'loglevel' in cfg else cfg['loglevel']
+        cfg['logfile'] = None if not 'logfile' in cfg else cfg['logfile']
+        cfg['logformat'] = 'default' if not 'logformat' in cfg else cfg['logformat']
+        self.numeric_log_level = getattr(logging, cfg['loglevel'].upper(), None)
         self.format_string = '%(asctime)s %(levelname)-9s %(message)s'
         if not isinstance(self.numeric_log_level, int):
-            raise ValueError('Invalid log level: {0}'.format(loglevel))
+            raise ValueError('Invalid log level: {0}'.format(cfg['loglevel']))
 
         self.handler = logging.StreamHandler(
-            open(logfile, 'a') if logfile else sys.stdout
+            open(cfg['logfile'], 'a') if cfg['logfile'] else sys.stdout
         )
 
         if self.numeric_log_level == 10: # DEBUG
@@ -50,7 +53,7 @@ class LogInfo(object):
                 '%(funcName)22s:%(lineno)-4d %(message)s'
             )
 
-        if logformat == 'json' or logformat == 'logstash':
+        if cfg['logformat'] == 'json' or cfg['logformat'] == 'logstash':
             self.handler.setFormatter(LogstashFormatter())
         else:
             self.handler.setFormatter(logging.Formatter(self.format_string))
