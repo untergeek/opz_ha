@@ -1,4 +1,5 @@
 import time, threading, logging
+import paho.mqtt.client as mqtt
 from pyA20.gpio import gpio
 from . import utils
 
