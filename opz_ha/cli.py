@@ -53,7 +53,7 @@ def cli(configuration_file, daemonize):
 
     This version is Orange Pi Zero specific
     """
-    config = utils.process_config(configuration_file)
+    config = process_config(configuration_file)
     logger = logging.getLogger(__name__)
     if daemonize:
         logger.info('Daemonizing process...')

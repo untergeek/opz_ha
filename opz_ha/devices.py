@@ -22,12 +22,12 @@ class OneWire(object):
             starttime = time.time()
             for topic in topics:
                 for device in topic['devices']:
-                    rawtemp = utils.read_sensor(utils._1wire_path(device['family'], device['id'], device['filename'])) 
+                    rawtemp = read_sensor(_1wire_path(device['family'], device['id'], device['filename'])) 
                     if rawtemp == None:
                         # In case we have a failure, or the device was removed, wait...
                         time.sleep(1.5)
                         continue
-                    formatted_temp = utils.fahrtigrade(rawtemp, device['temp_scale'] if 'temp_scale' in device else 'C')
+                    formatted_temp = fahrtigrade(rawtemp, device['temp_scale'] if 'temp_scale' in device else 'C')
                     self.send_state(
                         '{0}/{1}'.format(topic['topic_trunk'], device['topic_leaf']), 
                         '{0:.2f}'.format(formatted_temp), 
@@ -84,14 +84,14 @@ class ReedSwitch(object):
     def publish(self):
         time.sleep(1) # Wait one second from initialization before continuing
         while True:
-            logger.debug('{0}: publish: sleeping for {1} seconds'.format(utils.now(), self.interval))
+            logger.debug('Publish: sleeping for {1} seconds'.format(self.interval))
             time.sleep(self.interval)
-            logger.debug('{0}: publish: sending state...'.format(utils.now()))
+            logger.debug('Publish: sending state...')
             self.send_state()
 
     def send_state(self):
         state = 'open' if self.curr else 'closed'
-        logger.debug('{0}: {1} is {2}'.format(utils.now(), self.topic, state))
+        logger.debug('{0}: {1} is {2}'.format(now(), self.topic, state))
         if self.curr != None:
             tupleme = self.mqttc.publish(self.topic, payload=self.curr, qos=self.qos, retain=self.retain)
             logger.debug('Response: {0}'.format(tupleme))
