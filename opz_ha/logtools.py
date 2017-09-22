@@ -49,7 +49,7 @@ class LogInfo(object):
 
         if self.numeric_log_level == 10: # DEBUG
             self.format_string = (
-                '%(asctime)s %(levelname)-9s %(name)22s '
+                '%(asctime)s %(levelname)-9s %(name)25s '
                 '%(funcName)22s:%(lineno)-4d %(message)s'
             )
 
