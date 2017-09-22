@@ -20,14 +20,18 @@ class GDORelay(object):
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
 
+    def on_log(client, userdata, level, buf):
+        self.logger.debug("log: ",buf)
+
     def on_message(self, client, userdata, message):
-        logger.debug('message received: {0}'.format(message.payload))
-        logger.debug('message topic: {0}'.format(message.topic))
-        logger.debug('message qos: {0}'.format(message.qos))
-        logger.debug('message retain flag: {0}'.format(message.retain))
+        self.logger.debug('message received: {0}'.format(message.payload))
+        self.logger.debug('message topic: {0}'.format(message.topic))
+        self.logger.debug('message qos: {0}'.format(message.qos))
+        self.logger.debug('message retain flag: {0}'.format(message.retain))
 
     def get_state(self):
-        self.mqttc.on_message=self.on_message
+        self.mqttc.on_message = self.on_message
+        self.mqttc.on_log = self.on_log
         self.mqttc.subscribe(self.topic, self.qos)
 
     def buttonmash(self):
