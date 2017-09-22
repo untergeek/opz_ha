@@ -41,7 +41,7 @@ def launcher(mqttc, switches, interval=120, refresh=0.1):
         refresh = switch['refresh'] if 'refresh' in switch else refresh
         pin  = switch['gpio_pin'] if 'gpio_pin' in switch else 'NOTFOUND'
         port = switch['gpio_port'] if 'gpio_port' in switch else 'NOTFOUND'
-        pin_string = '{0}p{1}'.format(config['gpio_bus'], pin)
+        pin_string = '{0}p{1}'.format(switch['gpio_bus'], pin)
         if pin_string in dir(connector):
             switch = get_gpio_func('connector', pin_string)
         elif port.upper() in dir(port):
