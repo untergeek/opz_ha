@@ -40,7 +40,7 @@ class OneWire(object):
     def send_state(self, topic, payload, qos, retain):
         self.logger.debug('{0} will receive "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
         tupleme = self.mqttc.publish(topic, payload, qos, retain)
-        logger.debug('MQTT Response: {0}'.format(tupleme))
+        self.logger.debug('MQTT Response: {0}'.format(tupleme))
 
 
 class ReedSwitch(object):
