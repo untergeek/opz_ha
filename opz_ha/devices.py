@@ -23,7 +23,7 @@ class GDORelay(object):
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
 
-    def on_message(client, userdata, message):
+    def on_message(self, client, userdata, message):
         self.logger.debug('message received: {0}'.format(message.payload))
         self.logger.debug('message topic: {0}'.format(message.topic))
         self.logger.debug('message qos: {0}'.format(message.qos))
