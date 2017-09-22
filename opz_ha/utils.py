@@ -50,11 +50,11 @@ def get_yaml(path):
     return cfg
 
 def now():
-    logger.debug('{0} called'.format(__name__))
+    logger.debug('Function called.')
     return '{0}'.format(int(time.time()))
 
 def read_sensor(path):
-    logger.debug('{0} called'.format(__name__))
+    logger.debug('Function called.')
     value = None
     try:
         f = open(path, "r")
@@ -77,11 +77,11 @@ def read_sensor(path):
     return value
 
 def _1wire_path(family, _id, filename):
-    logger.debug('{0} called'.format(__name__))
+    logger.debug('Function called.')
     return '/sys/bus/w1/devices/{0}-{1}/{2}'.format(family, _id, filename)
 
 def fahrtigrade(value, scale='C'):
-    logger.debug('{0} called'.format(__name__))
+    logger.debug('Function called.')
     if scale == 'C':
         return value
     else:
