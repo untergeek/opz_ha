@@ -87,10 +87,10 @@ def set_logging(log_dict):
     logging.root.addHandler(loginfo.handler)
     logging.root.setLevel(loginfo.numeric_log_level)
     logger = logging.getLogger('opz_ha')
-    if log_dict['blacklist']:
-        for bl_entry in ensure_list(log_dict['blacklist']):
-            for handler in logging.root.handlers:
-                handler.addFilter(Blacklist(bl_entry))
+    # if log_dict['blacklist']:
+    #     for bl_entry in ensure_list(log_dict['blacklist']):
+    #         for handler in logging.root.handlers:
+    #             handler.addFilter(Blacklist(bl_entry))
 
 def process_config(yaml_file):
     config = get_yaml(yaml_file)
