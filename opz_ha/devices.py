@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class OneWire(object):
     def __init__(self, client, topics, interval=120):
+        logger = logging.getLogger('opz_ha.devices.OneWire')
         # client is mqtt client
         self.mqttc = client
         # Start background realtime read/report daemon thread
@@ -40,11 +41,12 @@ class OneWire(object):
     def send_state(self, topic, payload, qos, retain):
         logger.debug('{0} will receive "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
         tupleme = self.mqttc.publish(topic, payload, qos, retain)
-        logger.debug('Response: {0}'.format(tupleme))
+        logger.debug('MQTT Response: {0}'.format(tupleme))
 
 
 class ReedSwitch(object):
     def __init__(self, client, switch, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
+        logger = logging.getLogger('opz_ha.devices.ReedSwitch')
         # client is mqtt client
         self.mqttc = client
         # switch is port.XX## or connector.gpio#p#
@@ -94,4 +96,4 @@ class ReedSwitch(object):
         logger.debug('{0} is {1}'.format(self.topic, state))
         if self.curr != None:
             tupleme = self.mqttc.publish(self.topic, payload=self.curr, qos=self.qos, retain=self.retain)
-            logger.debug('Response: {0}'.format(tupleme))
+            logger.debug('MQTT Response: {0}'.format(tupleme))
