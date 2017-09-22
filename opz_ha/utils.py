@@ -64,7 +64,7 @@ def read_sensor(path):
         if m:
           value = float(m.group(2)) / 1000.0
       f.close()
-  except (IOError), e:
+  except IOError as e:
       logger.error('Unable to read: {0}.  Error: {1}'.format(path, e))
   # Since we are ostensibly reading regular human dwelling temperatures, 
   # and errors often read -69, this should help reduce the likelihood
