@@ -5,7 +5,7 @@ from ..devices import OneWire, ReedSwitch
 
 logger = logging.getLogger(__name__)
 
-GPIO_BUS = gpio1
+GPIO_BUS = 'gpio1'
 gpio.init()
 
 def constructor(*a, **k):
