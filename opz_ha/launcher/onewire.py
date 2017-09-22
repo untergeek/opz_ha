@@ -25,6 +25,7 @@ def launcher(mqttc, config):
               temp_scale: F
     """
     interval = config['interval'] if 'interval' in config else 120
+    logger.debug('Spawning thread to report 1-Wire temperatures at {0} second intervals'.format(interval))
     topics = config['topics']
     thread = threading.Thread(
         target=constructor, 

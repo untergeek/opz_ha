@@ -50,6 +50,7 @@ def launcher(mqttc, switches, interval=120, refresh=0.1):
             switch = get_gpio_func('port', port)
         else:
             raise RuntimeError('Unable to find GPIO interface for "{0}"'.format(topic))
+        logger.debug('Spawning thread to report state of GPIO{0} to topic {1}'.format(switch, topic))
         thread = threading.Thread(
             target=constructor, 
             args=(mqttc, switch, topic), 
