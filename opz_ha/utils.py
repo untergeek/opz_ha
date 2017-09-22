@@ -68,7 +68,7 @@ def read_sensor(path):
   # Since we are ostensibly reading regular human dwelling temperatures, 
   # and errors often read -69, this should help reduce the likelihood
   # of encountering those.
-  logger.debug('1-wire value = {0}'.format(value))
+  logger.debug('value at path {0} = {1} ºC'.format(path, value))
   if value:
       if value > 55.0 or value < -55.0:
           return None
