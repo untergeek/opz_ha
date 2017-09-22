@@ -1,6 +1,6 @@
 import time, threading, logging
 from pyA20.gpio import gpio
-from . import utils
+from .utils import *
 
 gpio.init()
 INTERVAL = 120

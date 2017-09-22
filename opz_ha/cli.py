@@ -5,7 +5,7 @@ import logging
 import click
 import daemon
 import paho.mqtt.client as mqtt
-from . import utils
+from .utils import *
 from .launcher import onewire, reedswitch
 from ._version import __version__
 
