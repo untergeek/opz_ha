@@ -38,9 +38,9 @@ class GDORelay(object):
             if m.payload == b'OPEN' or m.payload == b'CLOSE' or m.payload == b'STOP':
                 self.toggleRelay()
 
-    def on_disconnect(client, userdata, rc):
+    def on_disconnect(self, client, userdata, rc):
         if rc != 0:
-            print "Unexpected MQTT disconnection. Will auto-reconnect"
+            self.logger.warn('Unexpected MQTT disconnection. Will auto-reconnect')
     # def get_state(self):
     #     self.mqttc.on_message = self.on_message
     #     self.mqttc.subscribe(self.topic, self.qos)
