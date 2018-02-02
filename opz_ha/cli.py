@@ -29,7 +29,7 @@ def run(config):
         onewire.launcher(mqttc, config['onewire'])
     if 'gdo_relays' in config:
         # Use a separate MQTT client connection for the GDO
-        mqttGDO = mqtt.Client(client_id=config['mqtt']['client_id'])
+        mqttGDO = mqtt.Client(client_id='{0}-GDO'.format(config['mqtt']['client_id']))
         mqttGDO.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
         mqttGDO.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
         gdorelay.launcher(mqttGDO, config['gdo_relays'])
