@@ -17,11 +17,20 @@ class GDORelay(object):
         self.relay = relay
         self.topic = topic
         self.qos = qos
-        # Start background realtime read/report daemon thread
-        self.logger.info('Starting GDO relay monitoring thread')
-        read_state = threading.Thread(target=self.get_state, args=())
-        read_state.daemon = True                            # Daemonize thread
-        read_state.start()
+        # # Start background realtime read/report daemon thread
+        # self.logger.info('Starting GDO relay monitoring thread')
+        # read_state = threading.Thread(target=self.get_state, args=())
+        # read_state.daemon = True                            # Daemonize thread
+        # read_state.start()
+        self.mqttc.subscribe(topic, qos)
+        self.logger.debug('Subscribed to MQTT topic: {0}'.format(topic))
+        self.mqttc.on_message = self.on_message
+        self.logger.debug('Set the MQTT on_message behavior')
+        self.mqttc.on_disconnect = self.on_disconnect
+        self.logger.debug('Set the MQTT on_disconnect behavior')
+        self.logger.debug('Starting the MQTT loop for the GDORelay...')
+        self.mqttc.loop_start()
+        self.logger.debug('MQTT loop for the GDORelay has started... (this message may not display until afteer the loop is ended...')
 
     def on_message(self, client, obj, m):
         self.logger.debug('topic: {0}, payload: {1}, qos: {2}, retain: {3}'.format(m.topic, m.payload, m.qos, m.retain))
@@ -29,9 +38,12 @@ class GDORelay(object):
             if m.payload == b'OPEN' or m.payload == b'CLOSE' or m.payload == b'STOP':
                 self.toggleRelay()
 
-    def get_state(self):
-        self.mqttc.on_message = self.on_message
-        self.mqttc.subscribe(self.topic, self.qos)
+    def on_disconnect(client, userdata, rc):
+        if rc != 0:
+            print "Unexpected MQTT disconnection. Will auto-reconnect"
+    # def get_state(self):
+    #     self.mqttc.on_message = self.on_message
+    #     self.mqttc.subscribe(self.topic, self.qos)
 
     def toggleRelay(self):
         gpio.output(self.relay, gpio.HIGH)

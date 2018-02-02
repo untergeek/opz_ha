@@ -28,8 +28,12 @@ def run(config):
     if 'onewire' in config:
         onewire.launcher(mqttc, config['onewire'])
     if 'gdo_relays' in config:
-        gdorelay.launcher(mqttc, config['gdo_relays'])
-    return mqttc
+        # Use a separate MQTT client connection for the GDO
+        mqttGDO = mqtt.Client(client_id=config['mqtt']['client_id'])
+        mqttGDO.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
+        mqttGDO.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
+        gdorelay.launcher(mqttGDO, config['gdo_relays'])
+    return mqttc, mqttGDO
 
 
 @click.command()
@@ -50,14 +54,16 @@ def cli(configuration_file, daemonize):
     if daemonize:
         logger.info('Daemonizing process...')
         with daemon.DaemonContext():
-            mqttc = run(config)
+            mqttc, mqttGDO = run(config)
     else:
         logger.info('Running in foreground...')
-        mqttc = run(config)
+        mqttc, mqttGDO = run(config)
         try:
             while True:
                 time.sleep(1) 
         except KeyboardInterrupt:
             print ('Goodbye.')
+    # Stop both loops
     mqttc.loop_stop()
+    mqttGDO.loop_stop()
 
