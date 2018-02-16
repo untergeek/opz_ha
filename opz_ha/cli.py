@@ -67,7 +67,7 @@ def cli(configuration_file):
         while True:
             time.sleep(1) 
     except (KeyboardInterrupt, SystemExit) as e:
-        if isInstance(e, KeyboardInterrupt):
+        if isinstance(e, KeyboardInterrupt):
             print('Goodbye.')
         else:
             logger.info('SystemExit signal received.  Exiting...')
