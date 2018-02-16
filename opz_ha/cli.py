@@ -62,7 +62,7 @@ def cli(configuration_file):
     pid_path = config['pid_path'] if 'pid_path' in config else '/var/run/opz_ha.pid'
     pid = os.getpid()
     logger.debug('Writing pid {0} to {1}'.format(pid, pid_path))
-    utils.write_pid(pid_path, pid)
+    utils.write_pid(pid_path, '{0}\n'.format(pid))
     mqttc, mqttGDO = run(config)
     try:
         logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing started.')
