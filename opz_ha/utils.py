@@ -15,9 +15,38 @@ def read_file(myfile):
             data = f.read()
         return data
     except IOError as e:
-        raise Exception(
-            'Unable to read file {0}'.format(myfile)
-        )
+        raise Exception('Unable to read file {0}'.format(myfile))
+
+def write_pid(mypath, pid):
+    """
+    Write pid to a file
+
+    :arg mypath: The file to write the pid to.
+    :arg pid: The pid to write 
+    """
+    basedir = os.path.dirname(mypath)
+    if not os.path.exists(basedir):
+        try:
+            os.makedirs(basedir)
+        except Exception:
+            logger.critical('Unable to create path: {0}'.format(basedir))
+    try:
+        with open(mypath, 'w') as f:
+            f.write('{0}'.format(pid))
+    except IOError as e:
+        raise Exception('Unable to write pid {0} to file {1}'.format(pid, mypath))
+
+def rm_pid(mypath):
+    """
+    Delete pid file on clean exit
+
+    :arg mypath: The pid file.
+    """
+    try:
+        os.remove(mypath)
+    except IOError:
+        logger.error('Unable to delete pidfile "{0}"'.format(mypath))
+
 
 def get_yaml(path):
     """
