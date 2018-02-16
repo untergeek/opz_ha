@@ -17,18 +17,20 @@ class GDORelay(object):
         self.relay = relay
         self.topic = topic
         self.qos = qos
-        self.mqttc.subscribe(topic, qos)
-        self.logger.debug('Subscribed to MQTT topic: {0}'.format(topic))
         self.mqttc.on_message = self.on_message
-        self.logger.debug('Set the MQTT on_message behavior')
+        self.mqttc.on_connect = self.on_connect
         self.mqttc.on_disconnect = self.on_disconnect
-        self.logger.debug('Set the MQTT on_disconnect behavior')
         self.logger.debug('Starting the MQTT loop for the GDORelay...')
         # loop_start automatically does its own threading.  We just need a different
         # mqtt client here as we're subscribing to a topic, rather than 
         # publishing.  Maybe I could code around this, but this is easier to track.
         self.mqttc.loop_start()
         self.logger.debug('MQTT loop for the GDORelay has started...')
+
+    def on_connect(self, client, userdata, rc):
+        self.logger.info('Connected to MQTT with result code: {0}'.format(rc))
+        self.mqttc.subscribe(self.topic, self.qos)
+        self.logger.debug('Subscribed to MQTT topic: {0} at QoS {1}'.format(self.topic, self.qos))
 
     def on_message(self, client, obj, m):
         self.logger.debug('topic: {0}, payload: {1}, qos: {2}, retain: {3}'.format(m.topic, m.payload, m.qos, m.retain))
@@ -38,7 +40,7 @@ class GDORelay(object):
 
     def on_disconnect(self, client, userdata, rc):
         if rc != 0:
-            self.logger.warn('Unexpected MQTT disconnection. Will auto-reconnect')
+            self.logger.warn('Unexpected MQTT disconnection. Will attempt to auto-reconnect')
 
     def toggleRelay(self):
         gpio.output(self.relay, gpio.HIGH)
