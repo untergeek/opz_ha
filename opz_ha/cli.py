@@ -64,9 +64,8 @@ def cli(configuration_file, daemonize):
         logger.info('Daemonizing process...')
         with daemon.DaemonContext():
             mqttc, mqttGDO = run(config)
-            try:
-                while True:
-                    time.sleep(1)
+            while True:
+                time.sleep(1)
     else:
         logger.info('Running in foreground...')
         mqttc, mqttGDO = run(config)
