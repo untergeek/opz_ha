@@ -30,34 +30,34 @@ def get_install_requires():
     ]
 
 def base_setup():
-    return (
-        name = "opz_ha",
-        version = get_version(),
-        author = "Aaron Mildenstein",
-        description = "Tiny remote MQTT relay of GPIO data from Orange Pi Zero single-board computers",
-        long_description=fread('README.rst'),
-        url = "http://github.com/untergeek/opz_ha",
-        download_url = "https://github.com/untergeek/opz_ha/tarball/v" + get_version(),
-        license = "Apache License, Version 2.0",
-        install_requires = get_install_requires(),
-        keywords = "orangepi mqtt home automation",
-        packages = ["opz_ha"],
-        include_package_data=True,
-        entry_points = {
+    return {
+        "name":"opz_ha",
+        "version": get_version(),
+        "author": "Aaron Mildenstein",
+        "description": "Tiny remote MQTT relay of GPIO data from Orange Pi Zero single-board computers",
+        "long_description": fread('README.rst'),
+        "url": "http://github.com/untergeek/opz_ha",
+        "download_url": "https://github.com/untergeek/opz_ha/tarball/v" + get_version(),
+        "license": "Apache License, Version 2.0",
+        "install_requires": get_install_requires(),
+        "keywords": "orangepi mqtt home automation",
+        "packages": ["opz_ha"],
+        "include_package_data": True,
+        "entry_points": {
             "console_scripts" : [
-                "opz_ha_relay = opz_ha.cli:cli",
+                "opz_ha_relay: opz_ha.cli:cli",
             ]
         },
-        classifiers=[
+        "classifiers": [
             "Topic :: Home Automation",
             "Intended Audience :: Developers",
             "License :: OSI Approved :: Apache Software License",
             "Programming Language :: Python :: 3.5",
             "Programming Language :: Python :: 3.6",
         ],
-#        test_suite = "test.run_tests.run_all",
-#        tests_require = ["mock", "nose", "coverage", "nosexcover"],
-    )
+#        "test_suite": "test.run_tests.run_all",
+#        "tests_require": ["mock", "nose", "coverage", "nosexcover"],
+    }
 
 base = 'Console'
 ### cx_freeze bits ###
@@ -72,15 +72,16 @@ buildOptions = dict(
     excludes = [],
     include_files = [],
 )
-add_ons = (
-    options = {"build_exe" : buildOptions},
-    executables = [opz_ha_exe],
-)
+add_ons = {
+    "options": {"build_exe" : buildOptions},
+    "executables": [opz_ha_exe],
+}
 
+base = base_setup()
 try:
     ### cx_Freeze ###
     from cx_Freeze import setup, Executable
-    setup = base_setup() + add_ons
+    setup(**{**base, **add_ons})
 except ImportError:
-    setup = base_setup()
+    setup(**base)
 
