@@ -44,9 +44,9 @@ def base_setup():
         "packages": ["opz_ha"],
         "include_package_data": True,
         "entry_points": {
-            "console_scripts" : [
-                "opz_ha_relay: opz_ha.cli:cli",
-            ]
+            "console_scripts": [
+                "opz_ha_relay = opz_ha.cli:cli",
+            ],
         },
         "classifiers": [
             "Topic :: Home Automation",
