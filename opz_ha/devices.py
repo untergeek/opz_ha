@@ -27,8 +27,10 @@ class GDORelay(object):
         self.mqttc.loop_start()
         self.logger.debug('MQTT loop for the GDORelay has started...')
 
-    def on_connect(self, client, userdata, rc):
+    def on_connect(self, client, userdata, flags, rc):
         self.logger.info('Connected to MQTT with result code: {0}'.format(rc))
+        self.logger.debug('on_connect userdata: {0}'.format(userdata))
+        self.logger.debug('on_connect flags: {0}'.format(flags))
         self.mqttc.subscribe(self.topic, self.qos)
         self.logger.debug('Subscribed to MQTT topic: {0} at QoS {1}'.format(self.topic, self.qos))
 
