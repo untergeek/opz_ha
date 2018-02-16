@@ -1,7 +1,16 @@
-import yaml, os, re, sys, time, logging
+import yaml, os, re, sys, time, logging, signal
 from .logtools import LogInfo, Whitelist, Blacklist
 
 logger = logging.getLogger(__name__)
+
+class TerminationCatcher:
+  kill_received = False
+  def __init__(self):
+    signal.signal(signal.SIGINT, self.exit_gracefully)
+    signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+  def exit_gracefully(self, signum, frame):
+    self.kill_received = True
 
 def read_file(myfile):
     """

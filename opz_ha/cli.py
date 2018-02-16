@@ -56,6 +56,7 @@ def cli(configuration_file):
 
     This version is Orange Pi Zero specific
     """
+    termcatcher = utils.TerminationCatcher()
     config = utils.process_config(configuration_file)
     logger = logging.getLogger(__name__)
     logger.info('Starting OrangePi Zero GPIO/MQTT monitoring and publishing.')
@@ -67,12 +68,13 @@ def cli(configuration_file):
     try:
         logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing started.')
         while True:
+            if termcatcher.kill_received:
+                logger.info('Process terminated by signal...')
+                break
             time.sleep(1) 
-    except (KeyboardInterrupt, SystemExit) as e:
-        if isinstance(e, KeyboardInterrupt):
-            print('Goodbye.')
-        else:
-            logger.info('SystemExit signal received.  Exiting...')
+    except KeyboardInterrupt:
+        print('Terminating on keyboard interrupt. Goodbye.')
+        logger.info('Terminating on keyboard interrupt. Exiting...')
     # Stop both loops
     logger.info('Stopping publish client loop.')
     mqttc.loop_stop()
