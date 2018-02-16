@@ -4,7 +4,6 @@ import os
 import time
 import logging
 import click
-import daemon
 import paho.mqtt.client as mqtt
 from . import utils
 from .launcher import gdorelay, onewire, reedswitch
@@ -65,7 +64,7 @@ def cli(configuration_file):
         logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing started.')
         while True:
             time.sleep(1) 
-    except KeyboardInterrupt, Exception:
+    except (KeyboardInterrupt, Exception):
         print('Goodbye.')
     # Stop both loops
     logger.info('Stopping publish client loop.')
