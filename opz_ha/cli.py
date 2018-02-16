@@ -17,21 +17,30 @@ if not os.getegid() == 0:
     sys.exit('opz_ha must be run as root')
 
 def run(config):
+    logger = logging.getLogger(__name__)
+    logger.debug('Setting up MQTT publish client...')
     mqttc = mqtt.Client(client_id=config['mqtt']['client_id'])
     mqttc.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
+    logger.debug('Connecting to MQTT publish client...')
     mqttc.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
+    logger.debug('Starting MQTT publish client loop...')
     mqttc.loop_start()
     if 'reed_switches' in config:
         i = config['reed_switches']['interval'] if 'interval' in config['reed_switches'] else INTERVAL
         r = config['reed_switches']['refresh'] if 'refresh' in config['reed_switches'] else REFRESH
+        logger.info('Starting Reed Switch monitoring and publishing thread...')
         reedswitch.launcher(mqttc, config['reed_switches'], interval=i, refresh=r)
     if 'onewire' in config:
+        logger.info('Starting 1-wire protocol monitoring and publishing thread...')
         onewire.launcher(mqttc, config['onewire'])
     if 'gdo_relays' in config:
+        logger.debug('Setting up GDORelay MQTT subscribe client...')
         # Use a separate MQTT client connection for the GDO
         mqttGDO = mqtt.Client(client_id='{0}-GDO'.format(config['mqtt']['client_id']))
         mqttGDO.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
+        logger.debug('Establishing to GDORelay MQTT subscribe client object...')
         mqttGDO.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
+        logger.info('Starting GDORelay MQTT subscribe thread...')
         gdorelay.launcher(mqttGDO, config['gdo_relays'])
     return mqttc, mqttGDO
 
@@ -62,8 +71,10 @@ def cli(configuration_file, daemonize):
             while True:
                 time.sleep(1) 
         except KeyboardInterrupt:
-            print ('Goodbye.')
+            print('Goodbye.')
     # Stop both loops
+    logger.info('Stopping publish client loop.')
     mqttc.loop_stop()
+    logger.info('Stopping GDO subscribe client loop.')
     mqttGDO.loop_stop()
 
