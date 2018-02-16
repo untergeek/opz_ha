@@ -24,32 +24,13 @@ def get_version():
 def get_install_requires():
     return [
         'pyA20',
-        'paho-mqtt'
+        'paho-mqtt',
         'click>=6.7',
         'pyyaml>=3.10',
     ]
 
-try:
-    ### cx_Freeze ###
-    from cx_Freeze import setup, Executable
-    # Dependencies are automatically detected, but it might need
-    # fine tuning.
-
-    base = 'Console'
-
-    icon = None
-    opz_ha_exe = Executable(
-        "opz_ha.py",
-        base=base,
-        targetName = "opz_ha_relay",
-    )
-    buildOptions = dict(
-        packages = [],
-        excludes = [],
-        include_files = [],
-    )
-
-    setup(
+def base_setup():
+    return (
         name = "opz_ha",
         version = get_version(),
         author = "Aaron Mildenstein",
@@ -76,11 +57,30 @@ try:
         ],
 #        test_suite = "test.run_tests.run_all",
 #        tests_require = ["mock", "nose", "coverage", "nosexcover"],
-        options = {"build_exe" : buildOptions},
-        executables = [opz_ha_exe]
     )
-    ### end cx_Freeze ###
+
+base = 'Console'
+### cx_freeze bits ###
+icon = None
+opz_ha_exe = Executable(
+    "opz_ha.py",
+    base=base,
+    targetName = "opz_ha_relay",
+)
+buildOptions = dict(
+    packages = [],
+    excludes = [],
+    include_files = [],
+)
+add_ons = (
+    options = {"build_exe" : buildOptions},
+    executables = [opz_ha_exe],
+)
+
+try:
+    ### cx_Freeze ###
+    from cx_Freeze import setup, Executable
+    setup = base_setup() + add_ons
 except ImportError:
-    setup(
-        test_suite = "test.run_tests.run_all",
-    )
+    setup = base_setup()
+
