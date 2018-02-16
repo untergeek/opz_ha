@@ -47,7 +47,6 @@ def run(config):
 
 @click.command()
 @click.argument('configuration_file', type=click.Path(exists=True))
-@click.option('--daemonize', is_flag=True)
 @click.version_option(version=__version__)
 def cli(configuration_file, daemonize):
     """
@@ -59,21 +58,14 @@ def cli(configuration_file, daemonize):
     This version is Orange Pi Zero specific
     """
     config = utils.process_config(configuration_file)
-    logger = logging.getLogger(__name__)
-    if daemonize:
-        logger.info('Daemonizing process...')
-        with daemon.DaemonContext():
-            mqttc, mqttGDO = run(config)
-            while True:
-                time.sleep(1)
-    else:
-        logger.info('Running in foreground...')
-        mqttc, mqttGDO = run(config)
-        try:
-            while True:
-                time.sleep(1) 
-        except KeyboardInterrupt:
-            print('Goodbye.')
+    logger = logging.getLogger(__name__)    
+    mqttc, mqttGDO = run(config)
+    try:
+        logger.info('OrangePi Zero GPIO/MQTT monitoring fully started.')
+        while True:
+            time.sleep(1) 
+    except Exception:
+        print('Goodbye.')
     # Stop both loops
     logger.info('Stopping publish client loop.')
     mqttc.loop_stop()
