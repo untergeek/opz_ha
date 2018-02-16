@@ -6,8 +6,8 @@ import logging
 import click
 import paho.mqtt.client as mqtt
 from . import utils
-from .launcher import gdorelay, onewire, reedswitch
-from ._version import __version__
+from opz_ha.launcher import gdorelay, onewire, reedswitch
+from opz_ha._version import __version__
 
 INTERVAL = 120
 REFRESH = 0.1
