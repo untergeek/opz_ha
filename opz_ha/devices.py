@@ -77,7 +77,9 @@ class OneWire(object):
                         device['retain'] if 'retain' in device else True
                     )
                     time.sleep(1.5)
-            time.sleep(float(interval - (time.time() - starttime)))
+            sleeptime = float(interval - (time.time() - starttime))
+            if sleeptime > 0:
+                time.sleep(float(interval - (time.time() - starttime)))
 
     def send_state(self, topic, payload, qos, retain):
         self.logger.debug('Topic {0} will receive payload "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
