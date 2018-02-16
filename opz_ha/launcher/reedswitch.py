@@ -37,17 +37,23 @@ def launcher(mqttc, switches, interval=120, refresh=0.1):
     threads = []
     for switch in switches:
         topic = '{0}'.format(switch['topic'])
+        logger.debug('reedswitch topic: {0}'.format(topic))
         qos = switch['qos'] if 'qos' in switch else 0
         retain = switch['retain'] if 'retain' in switch else True
         pubinterval = switch['interval'] if 'interval' in switch else interval
         refresh = switch['refresh'] if 'refresh' in switch else refresh
         pin  = switch['gpio_pin'] if 'gpio_pin' in switch else 'NOTFOUND'
+        logger.debug('reedswitch pin: {0}'.format(pin))
         port = switch['gpio_port'] if 'gpio_port' in switch else 'NOTFOUND'
+        logger.debug('reedswitch port: {0}'.format(port))
         pin_string = '{0}p{1}'.format(GPIO_BUS, pin)
+        logger.debug('reedswitch pin_string: {0}'.format(pin_string))
         if pin_string in dir(connector):
             switch = get_gpio_func('connector', pin_string)
+            logger.debug('reedswitch pin_string switch: {0}'.format(switch))
         elif port.upper() in dir(port):
             switch = get_gpio_func('port', port)
+            logger.debug('reedswitch port switch: {0}'.format(switch))
         else:
             raise RuntimeError('Unable to find GPIO interface for "{0}"'.format(topic))
         logger.debug('Spawning thread to report state of GPIO{0} to topic {1}'.format(switch, topic))
