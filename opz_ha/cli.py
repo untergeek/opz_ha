@@ -58,7 +58,7 @@ def cli(configuration_file):
     """
     config = utils.process_config(configuration_file)
     pid_path = config['pid_path'] if 'pid_path' in config else '/var/run/opz_ha.pid'
-    write_pid(pid_path, os.getpid())
+    utils.write_pid(pid_path, os.getpid())
     logger = logging.getLogger(__name__)
     logger.info('Starting OrangePi Zero GPIO/MQTT monitoring and publishing.')
     mqttc, mqttGDO = run(config)
@@ -77,5 +77,5 @@ def cli(configuration_file):
     logger.info('Stopping GDO subscribe client loop.')
     mqttGDO.loop_stop()
     logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing halted.')
-    rm_pid(pid_path)
+    utils.rm_pid(pid_path)
 
