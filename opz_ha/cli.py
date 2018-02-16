@@ -48,7 +48,7 @@ def run(config):
 @click.command()
 @click.argument('configuration_file', type=click.Path(exists=True))
 @click.version_option(version=__version__)
-def cli(configuration_file, daemonize):
+def cli(configuration_file):
     """
     Orange Pi Zero for Home Assistant.
 
