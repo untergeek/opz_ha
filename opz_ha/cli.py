@@ -28,7 +28,7 @@ def run(config):
     if 'reed_switches' in config:
         i = config['reed_switches']['interval'] if 'interval' in config['reed_switches'] else INTERVAL
         r = config['reed_switches']['refresh'] if 'refresh' in config['reed_switches'] else REFRESH
-        logger.info('Starting Reed Switch monitoring and publishing thread...')
+        logger.info('Starting Reed Switch monitoring and publishing thread(s)...')
         reedswitch.launcher(mqttc, config['reed_switches'], interval=i, refresh=r)
     if 'onewire' in config:
         logger.info('Starting 1-wire protocol monitoring and publishing thread...')
@@ -58,17 +58,19 @@ def cli(configuration_file):
     This version is Orange Pi Zero specific
     """
     config = utils.process_config(configuration_file)
-    logger = logging.getLogger(__name__)    
+    logger = logging.getLogger(__name__)
+    logger.info('Starting OrangePi Zero GPIO/MQTT monitoring and publishing.')
     mqttc, mqttGDO = run(config)
     try:
-        logger.info('OrangePi Zero GPIO/MQTT monitoring fully started.')
+        logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing started.')
         while True:
             time.sleep(1) 
-    except Exception:
+    except KeyboardInterrupt, Exception:
         print('Goodbye.')
     # Stop both loops
     logger.info('Stopping publish client loop.')
     mqttc.loop_stop()
     logger.info('Stopping GDO subscribe client loop.')
     mqttGDO.loop_stop()
+    logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing halted.')
 
