@@ -62,25 +62,24 @@ def base_setup():
 base = 'Console'
 ### cx_freeze bits ###
 icon = None
-opz_ha_exe = Executable(
-    "opz_ha.py",
-    base=base,
-    targetName = "opz_ha_relay",
-)
-buildOptions = dict(
-    packages = [],
-    excludes = [],
-    include_files = [],
-)
-add_ons = {
-    "options": {"build_exe" : buildOptions},
-    "executables": [opz_ha_exe],
-}
-
 base = base_setup()
 try:
     ### cx_Freeze ###
     from cx_Freeze import setup, Executable
+    opz_ha_exe = Executable(
+        "opz_ha.py",
+        base=base,
+        targetName = "opz_ha_relay",
+    )
+    buildOptions = dict(
+        packages = [],
+        excludes = [],
+        include_files = [],
+    )
+    add_ons = {
+        "options": {"build_exe" : buildOptions},
+        "executables": [opz_ha_exe],
+    }
     setup(**{**base, **add_ons})
 except ImportError:
     setup(**base)
