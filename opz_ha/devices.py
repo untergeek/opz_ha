@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class GDORelay(object):
-    def __init__(self, client, mode, channel, topic, qos=2):
+    def __init__(self, client, modestring, channel, topic, qos=2):
         self.logger = logging.getLogger('opz_ha.devices.GDORelay')
-        self.logger.debug('Setting GPIO mode to: {0}'.format(mode))
-        GPIO.setmode(mode)
+        self.logger.debug('Setting GPIO mode to: {0}'.format(modestring.upper()))
+        GPIO.setmode(utils.getmode(modestring))
         self.logger.debug('Setting up GPIO channel "{0}" as an output'.format(channel))
         GPIO.setup(channel, GPIO.OUT)
         # client is mqtt client
@@ -93,10 +93,10 @@ class OneWire(object):
 
 
 class ReedSwitch(object):
-    def __init__(self, client, mode, channel, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
+    def __init__(self, client, modestring, channel, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
         self.logger = logging.getLogger('opz_ha.devices.ReedSwitch')
-        self.logger.debug('Setting GPIO mode to: {0}'.format(mode))
-        GPIO.setmode(mode)
+        self.logger.debug('Setting GPIO mode to: {0}'.format(modestring.upper()))
+        GPIO.setmode(utils.getmode(modestring))
         self.logger.debug('Setting up GPIO channel "{0}" as an input'.format(channel))
         GPIO.setup(channel, GPIO.IN)
         # client is mqtt client

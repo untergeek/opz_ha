@@ -28,7 +28,7 @@ def run(config):
         i = config['reed_switches']['interval'] if 'interval' in config['reed_switches'] else INTERVAL
         r = config['reed_switches']['refresh'] if 'refresh' in config['reed_switches'] else REFRESH
         logger.info('Starting Reed Switch monitoring and publishing thread(s)...')
-        reedswitch.launcher(mqttc, config['reed_switches'], interval=i, refresh=r)
+        reedswitch.launcher(mqttc, config['mode'], config['reed_switches'], interval=i, refresh=r)
     if 'onewire' in config:
         logger.info('Starting 1-wire protocol monitoring and publishing thread...')
         onewire.launcher(mqttc, config['onewire'])
@@ -40,7 +40,7 @@ def run(config):
         logger.debug('Establishing to GDORelay MQTT subscribe client object...')
         mqttGDO.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
         logger.info('Starting GDORelay MQTT subscribe thread...')
-        gdorelay.launcher(mqttGDO, config['gdo_relays'])
+        gdorelay.launcher(mqttGDO, config['mode'], config['gdo_relays'])
     return mqttc, mqttGDO
 
 
@@ -81,6 +81,11 @@ def cli(configuration_file):
     logger.info('Stopping GDO subscribe client loop.')
     mqttGDO.loop_stop()
     logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing halted.')
+    # Cleanup GPIO Channels
+    logger.info('Cleanup OrangePi Zero GPIO Channels.')
+    utils.cleanup_channels(config)
+    logger.info('OrangePi Zero GPIO Channels cleaned up.')
+    # Cleanup PID file
     logger.debug('Removing pid file {0}'.format(pid_path))
     utils.rm_pid(pid_path)
 

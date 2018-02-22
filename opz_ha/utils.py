@@ -1,5 +1,6 @@
 import yaml, os, re, sys, time, logging, signal
 from .logtools import LogInfo, Whitelist, Blacklist
+import OPi.GPIO as GPIO
 
 logger = logging.getLogger(__name__)
 
@@ -140,3 +141,20 @@ def process_config(yaml_file):
     config = get_yaml(yaml_file)
     set_logging(config['logging'])
     return config
+
+def get_mode(modestring):
+    try:
+        return getattr(GPIO, modestring.upper())()
+    except:
+        raise ValueError('{0} is not an acceptable value for "mode"'.format(modestring))
+
+def cleanup_channels(modestring, config):
+    # Because we assign channels separately, we need to find them all to clean them en masse
+    channels = []
+    if 'reed_switches' in config:
+        for switch in config['reed_switches']:
+            channels.append(switch['channel'])
+    if 'gdo_relays' in config:
+        for gdo_relay in config['gdo_relays']:
+            channels.append(gdo_relay['channel'])
+    GPIO.cleanup(channels)

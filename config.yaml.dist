@@ -11,15 +11,14 @@ logging:
   loglevel: INFO
   logfile: /var/log/opz_ha.log # If omitted, logs to stdout
   logformat: default
+mode: BOARD
 gdo_relays:
   - topic: opz1/gdo/main
-    sunxi_id: PG7
-    board_pin: 10
+    channel: 10
     qos: 2
 reed_switches:
   - topic: opz1/reed_switches/garage_door
-    sunxi_id: PA11
-    board_pin: 5
+    channel: 5
     qos: 0
     retain: true
     interval: 120
@@ -32,20 +31,6 @@ onewire:
         - topic_leaf: house_front
           family: 28
           id: 0516a04747ff
-          filename: w1_slave
-          qos: 0
-          retain: true
-          temp_scale: F
-        - topic_leaf: garage_high
-          family: 28
-          id: 03168cf595ff
-          filename: w1_slave
-          qos: 0
-          retain: true
-          temp_scale: F
-        - topic_leaf: cold_storage
-          family: 28
-          id: 0416a157d2ff
           filename: w1_slave
           qos: 0
           retain: true
