@@ -144,7 +144,7 @@ def process_config(yaml_file):
 
 def get_mode(modestring):
     try:
-        return getattr(GPIO, modestring.upper())()
+        return getattr(GPIO, modestring.upper())
     except:
         raise ValueError('{0} is not an acceptable value for "mode"'.format(modestring))
 
