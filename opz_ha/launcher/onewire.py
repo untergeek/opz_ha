@@ -1,9 +1,6 @@
 import time, threading, logging
-# import paho.mqtt.client as mqtt
-from pyA20.gpio import gpio, connector, port
 from ..devices import OneWire
 
-gpio.init()
 logger = logging.getLogger(__name__)
 
 def constructor(*a, **k):
