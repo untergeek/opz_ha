@@ -113,7 +113,7 @@ class ReedSwitch(object):
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
         # Start background periodic publishing daemon thread
-        self.logger.info('Start thread to publish current state of GPIO{0} to topic "{1}" every {2} seconds'.format(switch, topic, interval))
+        self.logger.info('Start thread to publish current state of channel {0} to topic "{1}" every {2} seconds'.format(channel, topic, interval))
         at_interval = threading.Thread(target=self.publish, args=())
         at_interval.daemon = True                           # Daemonize thread
         at_interval.start()
