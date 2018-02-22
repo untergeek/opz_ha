@@ -1,8 +1,7 @@
 import time, threading, logging
-from pyA20.gpio import gpio
+import OPi.GPIO as GPIO
 from . import utils
 
-gpio.init()
 INTERVAL = 120
 REFRESH = 0.1
 
@@ -10,11 +9,15 @@ logger = logging.getLogger(__name__)
 
 
 class GDORelay(object):
-    def __init__(self, client, relay, topic, qos=2):
+    def __init__(self, client, mode, channel, topic, qos=2):
         self.logger = logging.getLogger('opz_ha.devices.GDORelay')
+        self.logger.debug('Setting GPIO mode to: {0}'.format(mode))
+        GPIO.setmode(mode)
+        self.logger.debug('Setting up GPIO channel "{0}" as an output'.format(channel))
+        GPIO.setup(channel, GPIO.OUT)
         # client is mqtt client
         self.mqttc = client
-        self.relay = relay
+        self.channel = channel
         self.topic = topic
         self.qos = qos
         self.mqttc.on_message = self.on_message
@@ -45,9 +48,9 @@ class GDORelay(object):
             self.logger.warn('Unexpected MQTT disconnection. Will attempt to auto-reconnect')
 
     def toggleRelay(self):
-        gpio.output(self.relay, gpio.HIGH)
+        GPIO.output(self.channel, GPIO.HIGH)
         time.sleep(0.5)
-        gpio.output(self.relay, gpio.LOW)
+        GPIO.output(self.channel, GPIO.LOW)
 
 
 class OneWire(object):
@@ -90,24 +93,23 @@ class OneWire(object):
 
 
 class ReedSwitch(object):
-    def __init__(self, client, switch, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
+    def __init__(self, client, mode, channel, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
         self.logger = logging.getLogger('opz_ha.devices.ReedSwitch')
+        self.logger.debug('Setting GPIO mode to: {0}'.format(mode))
+        GPIO.setmode(mode)
+        self.logger.debug('Setting up GPIO channel "{0}" as an input'.format(channel))
+        GPIO.setup(channel, GPIO.IN)
         # client is mqtt client
         self.mqttc = client
-        # switch is port.XX## or connector.gpio#p#
         self.topic = topic
         self.interval = interval
         self.qos = qos
         self.retain = retain
-        # Set directions
-        gpio.setcfg(switch, gpio.INPUT)
-        # Enable pullup resistor
-        gpio.pullup(switch, gpio.PULLUP)
         self.curr = None
         self.prev = None
         # Start background realtime read/report daemon thread
-        self.logger.info('Starting reed switch monitoring of GPIO{0} for topic "{1}"'.format(switch, topic))
-        read_state = threading.Thread(target=self.get_state, args=(switch, refresh))
+        self.logger.info('Starting reed switch monitoring of channel {0} for topic "{1}"'.format(channel, topic))
+        read_state = threading.Thread(target=self.get_state, args=(channel, refresh))
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
         # Start background periodic publishing daemon thread
@@ -116,9 +118,9 @@ class ReedSwitch(object):
         at_interval.daemon = True                           # Daemonize thread
         at_interval.start()
 
-    def get_state(self, switch, refresh):
+    def get_state(self, channel, refresh):
         while True:
-            self.curr = gpio.input(switch)      # Read switch state
+            self.curr = GPIO.input(channel)      # Read channel state
             if self.prev is None:
                 self.prev = self.curr
                 self.send_state()

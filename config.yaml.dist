@@ -13,13 +13,13 @@ logging:
   logformat: default
 gdo_relays:
   - topic: opz1/gdo/main
-    gpio_port: PG7
-    gpio_pin: 10
+    sunxi_id: PG7
+    board_pin: 10
     qos: 2
 reed_switches:
   - topic: opz1/reed_switches/garage_door
-    gpio_port: PA11
-    gpio_pin: 5
+    sunxi_id: PA11
+    board_pin: 5
     qos: 0
     retain: true
     interval: 120

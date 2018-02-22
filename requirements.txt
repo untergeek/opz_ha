@@ -1,5 +1,5 @@
 pyyaml>=3.10
 paho-mqtt
-pyA20
+OPi.GPIO
 click
 
