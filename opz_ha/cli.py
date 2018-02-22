@@ -60,7 +60,7 @@ def cli(configuration_file):
     config = utils.process_config(configuration_file)
     logger = logging.getLogger(__name__)
     logger.info('Starting OrangePi Zero GPIO/MQTT monitoring and publishing.')
-    pid_path = config['pid_path'] if 'pid_path' in config else '/var/run/opz_ha.pid'
+    pid_path = config['pid_path'] if 'pid_path' in config and config['pid_path'] is not None else '/var/run/opz_ha.pid'
     pid = os.getpid()
     logger.debug('Writing pid {0} to {1}'.format(pid, pid_path))
     utils.write_pid(pid_path, '{0}\n'.format(pid))
