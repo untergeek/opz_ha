@@ -3,7 +3,7 @@ import time
 import logging
 import click
 import paho.mqtt.client as mqtt
-from opz_ha.defaults import pid_path
+import opz_ha.defaults as defaults
 from opz_ha.launcher import gdorelay, onewire, reedswitch
 from opz_ha._version import __version__
 from opz_ha.utils    import TerminationCatcher, cleanup_channels, process_config, rm_pid, write_pid
@@ -58,7 +58,7 @@ def cli(configuration_file):
     logger.info('Starting OrangePi Zero GPIO/MQTT monitoring and publishing.')
     # This is a special case where I also have to check for a 'None'
     # otherwise I'd be using `config_check`
-    pid_path = config['pid_path'] if 'pid_path' in config and config['pid_path'] is not None else pid_path()
+    pid_path = config['pid_path'] if 'pid_path' in config and config['pid_path'] is not None else defaults.pid_path()
     pid = os.getpid()
     logger.debug('Writing pid {0} to {1}'.format(pid, pid_path))
     write_pid(pid_path, '{0}\n'.format(pid))
