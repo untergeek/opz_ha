@@ -133,7 +133,7 @@ def fahrtigrade(value, scale):
 
 def check_config(config, key, default=None, msg=None):
     try:
-        return = config[key]
+        return config[key]
     except KeyError:
         if default:
             return default
