@@ -148,7 +148,7 @@ def get_mode(modestring):
     except:
         raise ValueError('{0} is not an acceptable value for "mode"'.format(modestring))
 
-def cleanup_channels(modestring, config):
+def cleanup_channels(config):
     # Because we assign channels separately, we need to find them all to clean them en masse
     channels = []
     if 'reed_switches' in config:
