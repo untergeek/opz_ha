@@ -105,6 +105,7 @@ class ReedSwitch(object):
         self.interval = interval
         self.qos = qos
         self.retain = retain
+        self.channel = channel
         self.get_state()
         self.send_state()
         GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._event_callback)
@@ -121,7 +122,7 @@ class ReedSwitch(object):
         # at_interval.start()
 
     def get_state(self):
-        self.state = 'open' if GPIO.input(channel) else 'closed'
+        self.state = 'open' if GPIO.input(self.channel) else 'closed'
 
     def _event_callback(self, channel):
         self.get_state()
