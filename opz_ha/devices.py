@@ -70,23 +70,23 @@ class OneWire(object):
             starttime = time.time()
             for device in devices:
                 serial     = check_config(device, 'serial', msg='No "serial" provided for {0}'.format(device))
-                topic      = check_config(device, 'topic', default='{0}/{1}'.format(defaults.w1_topic_base, serial))
-                family     = check_config(device, 'family', default=defaults.w1family)
-                filename   = check_config(device, 'filename', default=W1FILENAME)
-                temp_scale = check_config(device, 'temp_scale', default=defaults.w1tempscale)
-                rawtemp = read_sensor(get_1wire_path(family, serial, filename)) 
+                topic      = check_config(device, 'topic', default='{0}/{1}'.format(defaults.w1_topic_base(), serial))
+                family     = check_config(device, 'family', default=defaults.w1family())
+                filename   = check_config(device, 'filename', default=defaults.w1filename())
+                temp_scale = check_config(device, 'temp_scale', default=defaults.w1tempscale())
+                rawtemp = read_sensor(get_1wire_path(family, serial, filename))
                 if rawtemp == None:
                     # In case we have a failure, or the device was removed, wait...
-                    time.sleep(defaults.w1devicewait)
+                    time.sleep(defaults.w1devicewait())
                     # Then try the next device... 
                     continue
                 self.send_state(
                     topic, 
                     '{0:.2f}'.format(fahrtigrade(rawtemp, temp_scale)), # payload
-                    check_config(device, 'qos', default=defaults.qos),           # qos
-                    check_config(device, 'retain', default=defaults.retain)      # retain
+                    check_config(device, 'qos', default=defaults.qos()),           # qos
+                    check_config(device, 'retain', default=defaults.retain())      # retain
                 )
-                time.sleep(defaults.w1devicewait)
+                time.sleep(defaults.w1devicewait())
             sleeptime = float(interval - (time.time() - starttime))
             if sleeptime > 0:
                 time.sleep(sleeptime)

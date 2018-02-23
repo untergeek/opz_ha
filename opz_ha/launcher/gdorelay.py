@@ -24,9 +24,9 @@ def launcher(mqttc, modestring, relays):
     threads = []
     for relay in relays:
         channel = check_config(relay, 'channel', msg='GPIO channel not configured for {0}'.format(relay))
-        topic   = check_config(relay, 'topic', default='{0}/{1}'.format(defaults.gdo_topic_base, channel))
-        qos     = check_config(relay, 'qos', default=defaults.qos)
-        retain  = check_config(relay, 'retain', default=defaults.retain)
+        topic   = check_config(relay, 'topic', default='{0}/{1}'.format(defaults.gdo_topic_base(), channel))
+        qos     = check_config(relay, 'qos', default=defaults.qos())
+        retain  = check_config(relay, 'retain', default=defaults.retain())
         logger.debug('Spawning thread to read topic {0} and issue commands to channel {1}'.format(topic, channel))
         thread = threading.Thread(
             target=constructor, 

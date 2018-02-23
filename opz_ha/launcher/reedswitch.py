@@ -29,9 +29,9 @@ def launcher(mqttc, modestring, switches):
     threads = []
     for switch in switches:
         channel = check_config(switch, 'channel', msg='GPIO channel not configured for {0}'.format(switch))
-        topic   = check_config(switch, 'topic', default='{0}/{1}'.format(defaults.rs_topic_base, channel))
-        qos     = check_config(switch, 'qos', default=defaults.qos)
-        retain  = check_config(switch, 'retain', default=defaults.retain)
+        topic   = check_config(switch, 'topic', default='{0}/{1}'.format(defaults.rs_topic_base(), channel))
+        qos     = check_config(switch, 'qos', default=defaults.qos())
+        retain  = check_config(switch, 'retain', default=defaults.retain())
         logger.debug('Spawning thread to report state of channel "{0}" to topic {1}'.format(channel, topic))
         thread = threading.Thread(
             target=constructor, 
