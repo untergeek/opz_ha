@@ -105,9 +105,9 @@ class ReedSwitch(object):
         self.interval = interval
         self.qos = qos
         self.retain = retain
-        self.state = GPIO.input(channel) 
-        GPIO.add_event_detect(channel, GPIO.RISING, callback=self._open_callback)
-        GPIO.add_event_detect(channel, GPIO.FALLING, callback=self._closed_callback)
+        self.get_state()
+        self.send_state()
+        GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._event_callback)
         # self.prev = self.curr
         # # Start background realtime read/report daemon thread
         # self.logger.info('Starting reed switch monitoring of channel {0} for topic "{1}"'.format(channel, topic))
@@ -120,14 +120,12 @@ class ReedSwitch(object):
         # at_interval.daemon = True                           # Daemonize thread
         # at_interval.start()
 
-    def _open_callback(self, channel):
-        self.state = 'open'
-        self.logger.debug('Open event detected on channel "{0}"'.format(channel))
-        self.send_state()
+    def get_state(self):
+        self.state = 'open' if GPIO.input(channel) else 'closed'
 
-    def _closed_callback(self, channel):
-        self.state = 'closed'
-        self.logger.debug('Close event detected on channel "{0}"'.format(channel))
+    def _event_callback(self, channel):
+        self.get_state()
+        self.logger.debug('{0} event detected on channel "{1}"'.format(self.state.upper(), channel))
         self.send_state()
 
     # def get_state(self, channel, refresh):
