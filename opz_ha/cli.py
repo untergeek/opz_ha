@@ -24,7 +24,7 @@ def run(config):
         if not isinstance(config['reed_switches'], list):
             raise ValueError('No switches found in configuration.')
         logger.info('Starting Reed Switch monitoring and publishing thread(s)...')
-        reedswitch.launcher(mqttc, config['mode'], config['reed_switches'], interval=i, refresh=r)
+        reedswitch.launcher(mqttc, config['mode'], config['reed_switches'])
     if 'onewire' in config:
         logger.info('Starting 1-wire protocol monitoring and publishing thread...')
         onewire.launcher(mqttc, config['onewire'])
