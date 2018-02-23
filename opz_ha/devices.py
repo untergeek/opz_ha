@@ -107,7 +107,6 @@ class ReedSwitch(object):
         GPIO.setup(channel, GPIO.IN)
         self.mqttc = client
         self.topic = topic
-        self.interval = interval
         self.qos = qos
         self.retain = retain
         self.channel = channel
