@@ -1,37 +1,34 @@
 ---
 mqtt:
-  user: 
-  password: 
-  host: 
-  port: 1883
-  keepalive: 30
-  client_id: opz1_ha
-pid_path: # Can safely omit this key. Defaults to /var/run/opz_ha.pid
+  user:              # No default. Required if server requires it
+  password:          # No default. Required if server requires it
+  host:              # Required
+  port: 1883         # Default is 1883
+  keepalive: 30      # Default is 30
+  client_id: opz1_ha # Default is $HOSTNAME_ha
+pid_path:            # Defaults to /var/run/opz_ha.pid
 logging:
-  loglevel: INFO
-  logfile: /var/log/opz_ha.log # If omitted, logs to stdout
-  logformat: default
+  loglevel: INFO         # Default is INFO
+  logfile:               # If omitted, logs to stdout 
+  logformat: default     # Default value is "default"
 mode: BOARD
 gdo_relays:
-  - topic: opz1/gdo/main
-    channel: 10
-    qos: 2
+  - topic: opz1/gdo/main # Default is $HOSTNAME/gdo/$CHANNEL
+    channel: 10          # Required. Channel is pin that sends signal to relay.
+    qos: 2               # Default value of QoS is 2
+    retain: true         # Default value of retain is true
 reed_switches:
-  - topic: opz1/reed_switches/garage_door
-    channel: 5
-    qos: 0
-    retain: true
-    interval: 120
-    refresh: 0.1
+  - topic: opz1/reed_switches/garage_door # Default is $HOSTNAME/reed_switches/$CHANNEL
+    channel: 5                            # Required setting
+    qos: 0                                # Default QoS is 2
+    retain: true                          # Default value of retain is true
 onewire:
-  interval: 120
-  topics:
-    - topic_trunk: opz1/1wire
-      devices: 
-        - topic_leaf: house_front
-          family: 28
-          id: 0516a04747ff
-          filename: w1_slave
-          qos: 0
-          retain: true
-          temp_scale: F
+  interval: 120                     # Default value of interval is 120 (seconds)
+  devices:
+    - topic: opz1/1wire/house_front # Default is $HOSTNAME/1wire/$SERIAL
+      family: 28                    # Default is 28
+      serial: 0516a04747ff          # Required setting
+      filename: w1_slave            # Default is w1_slave
+      qos: 0                        # Default value of QoS is 2
+      retain: true                  # Default value of retain is true
+      temp_scale: F                 # Default value of temp_scale is C

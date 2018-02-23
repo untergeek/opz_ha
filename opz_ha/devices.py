@@ -1,18 +1,17 @@
-import time, threading, logging
+import logging
+import threading
+import time
 import OPi.GPIO as GPIO
-from . import utils
-
-INTERVAL = 120
-REFRESH = 0.1
+from opz_ha.defaults import INTERVAL, QOS, RETAIN, W1DEVICEWAIT, W1FAMILY, W1TEMPSCALE, W1_TOPIC_BASE
+from opz_ha.utils    import check_config, fahrtigrade, get_1wire_path, get_mode, read_sensor
 
 logger = logging.getLogger(__name__)
 
-
 class GDORelay(object):
-    def __init__(self, client, modestring, channel, topic, qos=2):
+    def __init__(self, client, modestring, channel, topic, qos, retain):
         self.logger = logging.getLogger('opz_ha.devices.GDORelay')
         self.logger.debug('Setting GPIO mode to: {0}'.format(modestring.upper()))
-        GPIO.setmode(utils.get_mode(modestring))
+        GPIO.setmode(get_mode(modestring))
         self.logger.debug('Setting up GPIO channel "{0}" as an output'.format(channel))
         GPIO.setup(channel, GPIO.OUT)
         # client is mqtt client
@@ -40,6 +39,8 @@ class GDORelay(object):
     def on_message(self, client, obj, m):
         self.logger.debug('topic: {0}, payload: {1}, qos: {2}, retain: {3}'.format(m.topic, m.payload, m.qos, m.retain))
         if m.topic == self.topic:
+            # Our simple GDO will "STOP" if you hit the button again, even though it's not a 
+            # true "STOP" command.  We should still catch and/or accept it.
             if m.payload == b'OPEN' or m.payload == b'CLOSE' or m.payload == b'STOP':
                 self.toggleRelay()
 
@@ -54,52 +55,56 @@ class GDORelay(object):
 
 
 class OneWire(object):
-    def __init__(self, client, topics, interval=120):
+    def __init__(self, client, devices, interval):
         self.logger = logging.getLogger('opz_ha.devices.OneWire')
         # client is mqtt client
         self.mqttc = client
         # Start background realtime read/report daemon thread
         self.logger.info('Starting 1-wire monitoring thread, collecting values every {0} seconds'.format(interval))
-        read_state = threading.Thread(target=self.get_state, args=(topics, interval))
+        read_state = threading.Thread(target=self.get_state, args=(devices, interval))
         read_state.daemon = True                            # Daemonize thread
         read_state.start()
 
-    def get_state(self, topics, interval):
+    def get_state(self, devices, interval):
         while True:
             starttime = time.time()
-            for topic in topics:
-                for device in topic['devices']:
-                    rawtemp = utils.read_sensor(utils._1wire_path(device['family'], device['id'], device['filename'])) 
-                    if rawtemp == None:
-                        # In case we have a failure, or the device was removed, wait...
-                        time.sleep(1.5)
-                        continue
-                    formatted_temp = utils.fahrtigrade(rawtemp, device['temp_scale'] if 'temp_scale' in device else 'C')
-                    self.send_state(
-                        '{0}/{1}'.format(topic['topic_trunk'], device['topic_leaf']), 
-                        '{0:.2f}'.format(formatted_temp), 
-                        device['qos'] if 'qos' in device else 0, 
-                        device['retain'] if 'retain' in device else True
-                    )
-                    time.sleep(1.5)
+            for device in devices:
+                serial     = check_config(device, 'serial', msg='No "serial" provided for {0}'.format(device))
+                topic      = check_config(device, 'topic', default='{0}/{1}'.format(W1_TOPIC_BASE, serial))
+                family     = check_config(device, 'family', default=W1FAMILY)
+                filename   = check_config(device, 'filename', default=W1FILENAME)
+                temp_scale = check_config(device, 'temp_scale', default=W1TEMPSCALE)
+                rawtemp = read_sensor(get_1wire_path(family, serial, filename)) 
+                if rawtemp == None:
+                    # In case we have a failure, or the device was removed, wait...
+                    time.sleep(W1DEVICEWAIT)
+                    # Then try the next device... 
+                    continue
+                self.send_state(
+                    topic, 
+                    '{0:.2f}'.format(fahrtigrade(rawtemp, temp_scale)), # payload
+                    check_config(device, 'qos', default=QOS),           # qos
+                    check_config(device, 'retain', default=RETAIN)      # retain
+                )
+                time.sleep(W1DEVICEWAIT)
             sleeptime = float(interval - (time.time() - starttime))
             if sleeptime > 0:
-                time.sleep(float(interval - (time.time() - starttime)))
+                time.sleep(sleeptime)
 
     def send_state(self, topic, payload, qos, retain):
+        # QoS and Retain are set per device
         self.logger.debug('Topic {0} will receive payload "{1}", with qos={2} and retain={3}'.format(topic, payload, qos, retain))
         tupleme = self.mqttc.publish(topic, payload, qos, retain)
         self.logger.debug('MQTT Response tuple: {0}'.format(tupleme))
 
 
 class ReedSwitch(object):
-    def __init__(self, client, modestring, channel, topic, qos=0, retain=True, interval=INTERVAL, refresh=REFRESH):
+    def __init__(self, client, modestring, channel, topic, qos, retain):
         self.logger = logging.getLogger('opz_ha.devices.ReedSwitch')
         self.logger.debug('Setting GPIO mode to: {0}'.format(modestring.upper()))
-        GPIO.setmode(utils.get_mode(modestring))
+        GPIO.setmode(get_mode(modestring))
         self.logger.debug('Setting up GPIO channel "{0}" as an input'.format(channel))
         GPIO.setup(channel, GPIO.IN)
-        # client is mqtt client
         self.mqttc = client
         self.topic = topic
         self.interval = interval
@@ -109,17 +114,6 @@ class ReedSwitch(object):
         self.get_state()
         self.send_state()
         GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._event_callback)
-        # self.prev = self.curr
-        # # Start background realtime read/report daemon thread
-        # self.logger.info('Starting reed switch monitoring of channel {0} for topic "{1}"'.format(channel, topic))
-        # read_state = threading.Thread(target=self.get_state, args=(channel, refresh))
-        # read_state.daemon = True                            # Daemonize thread
-        # read_state.start()
-        # Start background periodic publishing daemon thread
-        # self.logger.info('Start thread to publish current state of channel {0} to topic "{1}" every {2} seconds'.format(channel, topic, interval))
-        # at_interval = threading.Thread(target=self.publish, args=())
-        # at_interval.daemon = True                           # Daemonize thread
-        # at_interval.start()
 
     def get_state(self):
         self.state = 'open' if GPIO.input(self.channel) else 'closed'
@@ -129,29 +123,7 @@ class ReedSwitch(object):
         self.logger.debug('{0} event detected on channel "{1}"'.format(self.state.upper(), channel))
         self.send_state()
 
-    # def get_state(self, channel, refresh):
-    #     while True:
-    #         self.curr = GPIO.input(channel)      # Read channel state
-    #         if self.prev is None:
-    #             self.prev = self.curr
-    #             self.send_state()
-    #         elif self.prev != self.curr:
-    #             # We're only sending values here if they've changed
-    #             self.send_state()
-    #             self.prev = self.curr
-    #         time.sleep(refresh)
-
-    # def publish(self):
-    #     time.sleep(1) # Wait one second from initialization before continuing
-    #     while True:
-    #         self.logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
-    #         time.sleep(self.interval)
-    #         self.logger.debug('Publish: sending state...')
-    #         self.send_state()
-
     def send_state(self):
-        # state = 'open' if self.curr else 'closed'
         self.logger.debug('Reporting topic {0} as {1}'.format(self.topic, self.state))
-        # if self.curr != None:
         tupleme = self.mqttc.publish(self.topic, payload=self.state, qos=self.qos, retain=self.retain)
         self.logger.debug('MQTT Response tuple: {0}'.format(tupleme))

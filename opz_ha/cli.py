@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
-
 import os
 import time
 import logging
 import click
 import paho.mqtt.client as mqtt
-from . import utils
 from opz_ha.launcher import gdorelay, onewire, reedswitch
 from opz_ha._version import __version__
-
-INTERVAL = 120
-REFRESH = 0.1
+from opz_ha.defaults import PID_PATH
+from opz_ha.utils    import TerminationCatcher, cleanup_channels, process_config, rm_pid, write_pid
 
 if not os.getegid() == 0:
     sys.exit('opz_ha must be run as root')
@@ -25,8 +21,8 @@ def run(config):
     logger.debug('Starting MQTT publish client loop...')
     mqttc.loop_start()
     if 'reed_switches' in config:
-        i = config['reed_switches']['interval'] if 'interval' in config['reed_switches'] else INTERVAL
-        r = config['reed_switches']['refresh'] if 'refresh' in config['reed_switches'] else REFRESH
+        if not isinstance(config['reed_switches'], list):
+            raise ValueError('No switches found in configuration.')
         logger.info('Starting Reed Switch monitoring and publishing thread(s)...')
         reedswitch.launcher(mqttc, config['mode'], config['reed_switches'], interval=i, refresh=r)
     if 'onewire' in config:
@@ -56,14 +52,14 @@ def cli(configuration_file):
 
     This version is Orange Pi Zero specific
     """
-    termcatcher = utils.TerminationCatcher()
-    config = utils.process_config(configuration_file)
+    termcatcher = TerminationCatcher()
+    config = process_config(configuration_file)
     logger = logging.getLogger(__name__)
     logger.info('Starting OrangePi Zero GPIO/MQTT monitoring and publishing.')
-    pid_path = config['pid_path'] if 'pid_path' in config and config['pid_path'] is not None else '/var/run/opz_ha.pid'
+    pid_path = config['pid_path'] if 'pid_path' in config and config['pid_path'] is not None else PID_PATH
     pid = os.getpid()
     logger.debug('Writing pid {0} to {1}'.format(pid, pid_path))
-    utils.write_pid(pid_path, '{0}\n'.format(pid))
+    write_pid(pid_path, '{0}\n'.format(pid))
     mqttc, mqttGDO = run(config)
     try:
         logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing started.')
@@ -83,9 +79,9 @@ def cli(configuration_file):
     logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing halted.')
     # Cleanup GPIO Channels
     logger.info('Cleanup OrangePi Zero GPIO Channels.')
-    utils.cleanup_channels(config)
+    cleanup_channels(config)
     logger.info('OrangePi Zero GPIO Channels cleaned up.')
     # Cleanup PID file
     logger.debug('Removing pid file {0}'.format(pid_path))
-    utils.rm_pid(pid_path)
+    rm_pid(pid_path)
 

@@ -1,6 +1,12 @@
-import yaml, os, re, sys, time, logging, signal
-from .logtools import LogInfo, Whitelist, Blacklist
+import logging
+import os
+import re
+import signal
+import sys
+import time
+import yaml
 import OPi.GPIO as GPIO
+from opz_ha.logtools import LogInfo, Whitelist, Blacklist
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +95,6 @@ def get_yaml(path):
     return cfg
 
 def now():
-    logger.debug('Function called.')
     return '{0}'.format(int(time.time()))
 
 def read_sensor(path):
@@ -115,16 +120,27 @@ def read_sensor(path):
             return None
     return value
 
-def _1wire_path(family, _id, filename):
-    logger.debug('family = "{0}", _id = "{1}", filename = "{2}"'.format(family, _id, filename))
-    return '/sys/bus/w1/devices/{0}-{1}/{2}'.format(family, _id, filename)
+def get_1wire_path(family, serial, filename):
+    logger.debug('family = "{0}", serial = "{1}", filename = "{2}"'.format(family, serial, filename))
+    return '/sys/bus/w1/devices/{0}-{1}/{2}'.format(family, serial, filename)
 
-def fahrtigrade(value, scale='C'):
+def fahrtigrade(value, scale):
     logger.debug('Scale = {0}, value = {1}'.format(scale, value))
     if scale == 'C':
         return value
     else:
         return float(value * 9.0 / 5.0 + 32.0)
+
+def check_config(config, key, default=None, msg=None):
+    try:
+        return = config[key]
+    except KeyError:
+        if default:
+            return default
+        else:
+            raise KeyError(
+                'Key "{0}" not found in config: "{1}", '
+                'and no default value exists. {2}'.format(key, config, msg if msg else ''))
 
 def set_logging(log_dict):
     # Set up logging
