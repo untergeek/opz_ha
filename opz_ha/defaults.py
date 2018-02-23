@@ -1,20 +1,19 @@
 import socket
 
-HOSTNAME = socket.gethostname()
-
-QOS = 2
-RETAIN = True
-MQTT_PORT = 1883
-MQTT_KEEPALIVE = 30
-MQTT_CLIENT_ID = '{0}_ha'.format(HOSTNAME)
-RS_TOPIC_BASE = '{0}/reed_switches'.format(HOSTNAME)
-GDO_TOPIC_BASE = '{0}/gdo'.format(HOSTNAME)
-W1_TOPIC_BASE = '{0}/1wire'.format(HOSTNAME)
-PID_PATH = '/var/run/opz_ha.pid'
-LOGLEVEL = 'INFO'
-LOGFORMAT = 'default'
-W1FAMILY = '28'
-W1FILENAME = 'w1_slave'
-W1TEMPSCALE = 'C'
-W1INTERVAL = 120
-W1DEVICEWAIT = 1.5
+hostname       = socket.gethostname()
+qos            = 2
+retain         = True
+mqtt_port      = 1883
+mqtt_keepalive = 30
+mqtt_client_id = '{0}_ha'.format(hostname)
+rs_topic_base  = '{0}/reed_switches'.format(hostname)
+gdo_topic_base = '{0}/gdo'.format(hostname)
+w1_topic_base  = '{0}/1wire'.format(hostname)
+pid_path       = '/var/run/opz_ha.pid'
+loglevel       = 'INFO'
+logformat      = 'default'
+w1family       = '28'
+w1filename     = 'w1_slave'
+w1tempscale    = 'C'
+w1interval     = 120
+w1devicewait   = 1.5

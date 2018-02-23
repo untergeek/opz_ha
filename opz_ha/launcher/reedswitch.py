@@ -1,7 +1,7 @@
 import logging
 import threading
 import OPi.GPIO as GPIO
-from opz_ha.defaults import INTERVAL, QOS, RETAIN, RS_TOPIC_BASE
+import opz_ha.defaults as defaults
 from opz_ha.devices  import ReedSwitch
 from opz_ha.utils    import check_config, get_mode
 
@@ -27,12 +27,11 @@ def launcher(mqttc, modestring, switches):
     """
     threadnum = 1
     threads = []
-    mode = get_mode(modestring)
     for switch in switches:
         channel = check_config(switch, 'channel', msg='GPIO channel not configured for {0}'.format(switch))
-        topic   = check_config(switch, 'topic', default='{0}/{1}'.format(RS_TOPIC_BASE, channel))
-        qos     = check_config(switch, 'qos', default=QOS)
-        retain  = check_config(switch, 'retain', default=RETAIN)
+        topic   = check_config(switch, 'topic', default='{0}/{1}'.format(defaults.rs_topic_base, channel))
+        qos     = check_config(switch, 'qos', default=defaults.qos)
+        retain  = check_config(switch, 'retain', default=defaults.retain)
         logger.debug('Spawning thread to report state of channel "{0}" to topic {1}'.format(channel, topic))
         thread = threading.Thread(
             target=constructor, 
