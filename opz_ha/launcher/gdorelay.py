@@ -3,7 +3,7 @@ import threading
 import OPi.GPIO as GPIO
 import opz_ha.defaults as defaults
 from opz_ha.devices import GDORelay
-from opz_ha.utils import config_check, get_mode
+from opz_ha.utils import check_config, get_mode
 
 logger = logging.getLogger(__name__)
 
