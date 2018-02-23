@@ -105,42 +105,54 @@ class ReedSwitch(object):
         self.interval = interval
         self.qos = qos
         self.retain = retain
-        self.curr = None
-        self.prev = None
-        # Start background realtime read/report daemon thread
-        self.logger.info('Starting reed switch monitoring of channel {0} for topic "{1}"'.format(channel, topic))
-        read_state = threading.Thread(target=self.get_state, args=(channel, refresh))
-        read_state.daemon = True                            # Daemonize thread
-        read_state.start()
+        self.state = GPIO.input(channel) 
+        GPIO.add_event_detect(channel, GPIO.RISING, callback=self._open_callback)
+        GPIO.add_event_detect(channel, GPIO.FALLING, callback=self._closed_callback)
+        # self.prev = self.curr
+        # # Start background realtime read/report daemon thread
+        # self.logger.info('Starting reed switch monitoring of channel {0} for topic "{1}"'.format(channel, topic))
+        # read_state = threading.Thread(target=self.get_state, args=(channel, refresh))
+        # read_state.daemon = True                            # Daemonize thread
+        # read_state.start()
         # Start background periodic publishing daemon thread
-        self.logger.info('Start thread to publish current state of channel {0} to topic "{1}" every {2} seconds'.format(channel, topic, interval))
-        at_interval = threading.Thread(target=self.publish, args=())
-        at_interval.daemon = True                           # Daemonize thread
-        at_interval.start()
+        # self.logger.info('Start thread to publish current state of channel {0} to topic "{1}" every {2} seconds'.format(channel, topic, interval))
+        # at_interval = threading.Thread(target=self.publish, args=())
+        # at_interval.daemon = True                           # Daemonize thread
+        # at_interval.start()
 
-    def get_state(self, channel, refresh):
-        while True:
-            self.curr = GPIO.input(channel)      # Read channel state
-            if self.prev is None:
-                self.prev = self.curr
-                self.send_state()
-            elif self.prev != self.curr:
-                # We're only sending values here if they've changed
-                self.send_state()
-                self.prev = self.curr
-            time.sleep(refresh)
+    def _open_callback(self, channel):
+        self.state = 'open'
+        self.logger.debug('Open event detected on channel "{0}"'.format(channel))
+        self.send_state()
 
-    def publish(self):
-        time.sleep(1) # Wait one second from initialization before continuing
-        while True:
-            self.logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
-            time.sleep(self.interval)
-            self.logger.debug('Publish: sending state...')
-            self.send_state()
+    def _closed_callback(self, channel):
+        self.state = 'closed'
+        self.logger.debug('Close event detected on channel "{0}"'.format(channel))
+        self.send_state()
+
+    # def get_state(self, channel, refresh):
+    #     while True:
+    #         self.curr = GPIO.input(channel)      # Read channel state
+    #         if self.prev is None:
+    #             self.prev = self.curr
+    #             self.send_state()
+    #         elif self.prev != self.curr:
+    #             # We're only sending values here if they've changed
+    #             self.send_state()
+    #             self.prev = self.curr
+    #         time.sleep(refresh)
+
+    # def publish(self):
+    #     time.sleep(1) # Wait one second from initialization before continuing
+    #     while True:
+    #         self.logger.debug('Publish: sleeping for {0} seconds'.format(self.interval))
+    #         time.sleep(self.interval)
+    #         self.logger.debug('Publish: sending state...')
+    #         self.send_state()
 
     def send_state(self):
-        state = 'open' if self.curr else 'closed'
-        self.logger.debug('Reporting topic {0} as {1}'.format(self.topic, state))
-        if self.curr != None:
-            tupleme = self.mqttc.publish(self.topic, payload=self.curr, qos=self.qos, retain=self.retain)
-            self.logger.debug('MQTT Response tuple: {0}'.format(tupleme))
+        # state = 'open' if self.curr else 'closed'
+        self.logger.debug('Reporting topic {0} as {1}'.format(self.topic, self.state))
+        # if self.curr != None:
+        tupleme = self.mqttc.publish(self.topic, payload=self.state, qos=self.qos, retain=self.retain)
+        self.logger.debug('MQTT Response tuple: {0}'.format(tupleme))
