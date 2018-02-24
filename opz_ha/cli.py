@@ -13,30 +13,44 @@ if not os.getegid() == 0:
 
 def run(config):
     logger = logging.getLogger(__name__)
+
     logger.debug('Setting up MQTT publish client...')
-    mqttc = mqtt.Client(client_id=config['mqtt']['client_id'])
-    mqttc.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
+    mode  = check_config(config, 'mode', msg='mode must be one of BOARD, SUNXI, BCM')
+    host  = check_config(config['mqtt'], 'host', msg='No MQTT host provided.')
+    port  = check_config(config['mqtt'], 'port', default=defaults.mqtt_port)
+    ka    = check_config(config['mqtt'], 'keepalive', default=defaults.mqtt_keepalive)
+    cid   = check_config(config['mqtt'], 'client_id', default=defaults.mqtt_client_id)
+    mqttc = mqtt.Client(client_id=cid)
+    if 'user' in config['mqtt'] and config['mqtt']['user'] is not None:
+        anonymous = False
+        logger.debug('Connecting to MQTT with username and provided password')
+        try:
+            mqttc.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
+        except KeyError:
+            raise KeyError('Password not provided for MQTT client')
+    else:
+        anonymous = True
+        logger.info('No username provided.  Connect to MQTT anonymously.')
     logger.debug('Connecting to MQTT publish client...')
-    mqttc.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
+    mqttc.connect(host, port=port, keepalive=ka)
     logger.debug('Starting MQTT publish client loop...')
     mqttc.loop_start()
     if 'reed_switches' in config:
-        if not isinstance(config['reed_switches'], list):
-            raise ValueError('No switches found in configuration.')
         logger.info('Starting Reed Switch monitoring and publishing thread(s)...')
-        reedswitch.launcher(mqttc, config['mode'], config['reed_switches'])
+        reedswitch.launcher(mqttc, mode, config)
     if 'onewire' in config:
         logger.info('Starting 1-wire protocol monitoring and publishing thread...')
-        onewire.launcher(mqttc, config['onewire'])
+        onewire.launcher(mqttc, config)
     if 'gdo_relays' in config:
         logger.debug('Setting up GDORelay MQTT subscribe client...')
         # Use a separate MQTT client connection for the GDO
-        mqttGDO = mqtt.Client(client_id='{0}-GDO'.format(config['mqtt']['client_id']))
-        mqttGDO.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
+        mqttGDO = mqtt.Client(client_id='{0}-GDO'.format(cid))
+        if not anonymous:
+            mqttGDO.username_pw_set(config['mqtt']['user'], password=config['mqtt']['password'])
         logger.debug('Establishing to GDORelay MQTT subscribe client object...')
-        mqttGDO.connect(config['mqtt']['host'], port=config['mqtt']['port'], keepalive=config['mqtt']['keepalive'])
+        mqttGDO.connect(host, port=port, keepalive=ka)
         logger.info('Starting GDORelay MQTT subscribe thread...')
-        gdorelay.launcher(mqttGDO, config['mode'], config['gdo_relays'])
+        gdorelay.launcher(mqttGDO, mode, config)
     return mqttc, mqttGDO
 
 

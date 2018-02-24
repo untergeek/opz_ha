@@ -10,10 +10,9 @@ logger = logging.getLogger(__name__)
 def constructor(*a, **k):
     rs = ReedSwitch(*a, **k)
 
-def launcher(mqttc, modestring, switches):
+def launcher(mqttc, modestring, config):
     """
-    switches is an array of reed switch configuration data, 
-    as extracted from this YAML:
+    config is the full configuration file.
     mode: SUNXI                                 # Must be one of BOARD, SUNXI, BCM
     reed_switches:
       - channel: PA12                           # Required value.  If mode is SUNXI, value should be in format of PnXX
@@ -27,7 +26,9 @@ def launcher(mqttc, modestring, switches):
     """
     threadnum = 1
     threads = []
-    for switch in switches:
+    if not isinstance(config['reed_switches'], list):
+        raise ValueError('No switches found in configuration.')
+    for switch in config['reed_switches']:
         channel = check_config(switch, 'channel', msg='GPIO channel not configured for {0}'.format(switch))
         topic   = check_config(switch, 'topic', default='{0}/{1}'.format(defaults.rs_topic_base(), channel))
         qos     = check_config(switch, 'qos', default=defaults.qos())

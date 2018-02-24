@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 def constructor(*a, **k):
     rs = GDORelay(*a, **k)
 
-def launcher(mqttc, modestring, relays):
+def launcher(mqttc, modestring, config):
     """
     mode: BOARD                # Must be one of BOARD, SUNXI, or BCM
-    gdo_relay:
+    gdo_relays:
       - channel: 10            # If mode is BOARD, this value should be an integer pin number as counted on the Orange Pi Zero Board
         topic: opz1/gdo/main   # Default is $HOSTNAME/gdo/$CHANNEL
         qos: 2                 # Default is 2
@@ -22,7 +22,9 @@ def launcher(mqttc, modestring, relays):
     """
     threadnum = 1
     threads = []
-    for relay in relays:
+    if not isinstance(config['gdo_relays'], list):
+        raise ValueError('No gdo_relays found in configuration.')
+    for relay in config['gdo_relays']:
         channel = check_config(relay, 'channel', msg='GPIO channel not configured for {0}'.format(relay))
         topic   = check_config(relay, 'topic', default='{0}/{1}'.format(defaults.gdo_topic_base(), channel))
         qos     = check_config(relay, 'qos', default=defaults.qos())

@@ -14,16 +14,18 @@ def launcher(mqttc, config):
     onewire:
       interval: 120              # Default value is 120
       devices: 
-        family: 28               # Default is 28
-        serial: 0516a04747ff     # Required value
-        filename: w1_slave       # Default is w1_slave
-        topic:                   # Default value is $HOSTNAME/1wire/$SERIAL
-        qos: 0                   # Default is 2
-        retain: true             # Default is true
-        temp_scale: F            # Default is C
-        meta: House Front Temp   # Optional metadata field to describe anything.  Does not get sent.
+        - serial: 0516a04747ff     # Required value
+          topic:                   # Default value is $HOSTNAME/1wire/$SERIAL
+          family: 28               # Default is 28
+          filename: w1_slave       # Default is w1_slave
+          qos: 0                   # Default is 2
+          retain: true             # Default is true
+          temp_scale: F            # Default is C
+          meta: House Front Temp   # Optional metadata field to describe anything.  Does not get sent.
     """
     interval = check_config(config, 'interval', default=defaults.interval())
+    if not isinstance(config['onewire']['devices'], list):
+        raise ValueError('No 1-Wire devices found in configuration.')
     devices  = check_config(config, 'devices', msg='No 1-Wire devices in configuration: {0}'.format(config))
     logger.debug('Spawning thread to report 1-Wire temperatures at {0} second intervals'.format(interval))
     thread = threading.Thread(
