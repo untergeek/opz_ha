@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 import opz_ha.defaults as defaults
 from opz_ha.launcher import gdorelay, onewire, reedswitch
 from opz_ha._version import __version__
-from opz_ha.utils    import TerminationCatcher, check_config, cleanup_channels, 
+from opz_ha.utils    import TerminationCatcher, check_config, cleanup_channels, \
                             process_config, rm_pid, write_pid
 
 if not os.getegid() == 0:
