@@ -25,8 +25,8 @@ def launcher(mqttc, config):
     """
     interval = check_config(config, 'interval', default=defaults.interval())
     if not isinstance(config['onewire']['devices'], list):
-        raise ValueError('No 1-Wire devices found in configuration.')
-    devices  = check_config(config, 'devices', msg='No 1-Wire devices in configuration: {0}'.format(config))
+        raise ValueError('"devices" should be a YAML list')
+    devices  = check_config(config['onewire'], 'devices', msg='No 1-Wire devices in configuration: {0}'.format(config))
     logger.debug('Spawning thread to report 1-Wire temperatures at {0} second intervals'.format(interval))
     thread = threading.Thread(
         target=constructor, 
