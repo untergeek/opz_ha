@@ -116,18 +116,19 @@ class ReedSwitch(object):
 
 
     def report(self):
+        self.last_run = time.time() - 59.99
         while True:
             start = time.time()
             self.get_state()
             self.send_state()
-            end = time.time()
             # Sleep so it's as close to 60 second intervals as possible.
-            if end - start < 60:
-                time.sleep(60.0 - (end - start))
+            if time.time() - start < 60:
+                time.sleep(60.0 - (time.time() - self.last_run))
                 self.logger.debug('Slept {0} seconds'.format(60.0 - (end - start)))
             else:
                 # otherwise sleep 60 seconds
                 time.sleep(60)
+            self.last_run = start
 
     def get_state(self):
         self.state = 'open' if GPIO.input(self.channel) else 'closed'
