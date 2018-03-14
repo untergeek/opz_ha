@@ -123,8 +123,9 @@ class ReedSwitch(object):
             self.send_state()
             # Sleep so it's as close to 60 second intervals as possible.
             if time.time() - start < 60:
-                time.sleep(60.0 - (time.time() - self.last_run))
-                self.logger.debug('Slept {0} seconds'.format(60.0 - (end - start)))
+                val = 60.0 - (time.time() - self.last_run)
+                time.sleep(val)
+                self.logger.debug('Slept {0} seconds'.format(val))
             else:
                 # otherwise sleep 60 seconds
                 time.sleep(60)
