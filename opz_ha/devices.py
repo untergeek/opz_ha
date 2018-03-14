@@ -15,12 +15,12 @@ class GDORelay(object):
         self.logger.debug('Setting up GPIO channel "{0}" as an output'.format(channel))
         GPIO.setup(channel, GPIO.OUT)
         # client is mqtt client
-        self.mqttc               = client
-        self.channel             = channel
-        self.topic               = topic
-        self.qos                 = qos
-        self.mqttc.on_message    = self.on_message
-        self.mqttc.on_connect    = self.on_connect
+        self.mqttc = client
+        self.channel = channel
+        self.topic = topic
+        self.qos = qos
+        self.mqttc.on_message = self.on_message
+        self.mqttc.on_connect = self.on_connect
         self.mqttc.on_disconnect = self.on_disconnect
         self.logger.debug('Starting the MQTT loop for the GDORelay...')
         # loop_start automatically does its own threading.  We just need a different
@@ -67,12 +67,12 @@ class OneWire(object):
         while True:
             starttime = time.time()
             for device in devices:
-                serial     = check_config(device, 'serial', msg='No "serial" provided for {0}'.format(device))
-                topic      = check_config(device, 'topic', default='{0}/{1}'.format(defaults.w1_topic_base(), serial))
-                family     = check_config(device, 'family', default=defaults.w1family())
-                filename   = check_config(device, 'filename', default=defaults.w1filename())
+                serial = check_config(device, 'serial', msg='No "serial" provided for {0}'.format(device))
+                topic = check_config(device, 'topic', default='{0}/{1}'.format(defaults.w1_topic_base(), serial))
+                family = check_config(device, 'family', default=defaults.w1family())
+                filename = check_config(device, 'filename', default=defaults.w1filename())
                 temp_scale = check_config(device, 'temp_scale', default=defaults.w1tempscale())
-                rawtemp    = read_sensor(get_1wire_path(family, serial, filename))
+                rawtemp = read_sensor(get_1wire_path(family, serial, filename))
                 if rawtemp == None:
                     # In case we have a failure, or the device was removed, wait...
                     time.sleep(defaults.w1devicewait())
@@ -103,14 +103,14 @@ class ReedSwitch(object):
         GPIO.setmode(get_mode(modestring))
         self.logger.debug('Setting up GPIO channel "{0}" as an input'.format(channel))
         GPIO.setup(channel, GPIO.IN)
-        self.mqttc   = client
-        self.topic   = topic
-        self.qos     = qos
-        self.retain  = retain
+        self.mqttc = client
+        self.topic = topic
+        self.qos = qos
+        self.retain = retain
         self.channel = channel
         self.get_state()
         self.send_state()
-        GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._event_callback)
+        GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._event_callback, bouncetime=200)
 
     def get_state(self):
         self.state = 'open' if GPIO.input(self.channel) else 'closed'
