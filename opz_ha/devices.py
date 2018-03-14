@@ -108,9 +108,25 @@ class ReedSwitch(object):
         self.qos = qos
         self.retain = retain
         self.channel = channel
-        self.get_state()
-        self.send_state()
+        self.logger.info('Start thread to publish current state of channel "{0}" to topic "{1}" every 60 seconds'.format(channel, topic))
+        periodic = threading.Thread(target=self.report, args=())
+        periodic.daemon = True
+        periodic.start()
         GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._event_callback, bouncetime=200)
+
+
+    def report(self):
+        while True:
+            start = time.now()
+            self.get_state()
+            self.send_state()
+            end = time.now()
+            # Sleep so it's as close to 60 second intervals as possible.
+            if end - start < 60:
+                time.sleep(60-(end-start))
+            else:
+                # otherwise sleep 60 seconds
+                time.sleep(60)
 
     def get_state(self):
         self.state = 'open' if GPIO.input(self.channel) else 'closed'
