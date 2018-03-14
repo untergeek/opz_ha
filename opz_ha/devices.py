@@ -123,7 +123,8 @@ class ReedSwitch(object):
             end = time.time()
             # Sleep so it's as close to 60 second intervals as possible.
             if end - start < 60:
-                time.sleep(60 - (end - start))
+                time.sleep(60.0 - (end - start))
+                self.logger.debug('Slept {0} seconds'.format(60.0 - (end - start)))
             else:
                 # otherwise sleep 60 seconds
                 time.sleep(60)
