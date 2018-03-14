@@ -117,13 +117,13 @@ class ReedSwitch(object):
 
     def report(self):
         while True:
-            start = time.now()
+            start = time.time()
             self.get_state()
             self.send_state()
-            end = time.now()
+            end = time.time()
             # Sleep so it's as close to 60 second intervals as possible.
             if end - start < 60:
-                time.sleep(60-(end-start))
+                time.sleep(60 - (end - start))
             else:
                 # otherwise sleep 60 seconds
                 time.sleep(60)
