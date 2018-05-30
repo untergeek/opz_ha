@@ -8,7 +8,7 @@ from opz_ha.utils    import check_config, get_mode
 logger = logging.getLogger(__name__)
 
 def constructor(*a, **k):
-    rs = ReedSwitch(*a, **k)
+    _ = ReedSwitch(*a, **k)
 
 def launcher(mqttc, modestring, config):
     """
@@ -30,9 +30,9 @@ def launcher(mqttc, modestring, config):
         raise ValueError('No switches found in configuration.')
     for switch in config['reed_switches']:
         channel = check_config(switch, 'channel', msg='GPIO channel not configured for {0}'.format(switch))
-        topic   = check_config(switch, 'topic', default='{0}/{1}'.format(defaults.rs_topic_base(), channel))
-        qos     = check_config(switch, 'qos', default=defaults.qos())
-        retain  = check_config(switch, 'retain', default=defaults.retain())
+        topic = check_config(switch, 'topic', default='{0}/{1}'.format(defaults.rs_topic_base(), channel))
+        qos = check_config(switch, 'qos', default=defaults.qos())
+        retain = check_config(switch, 'retain', default=defaults.retain())
         logger.debug('Spawning thread to report state of channel "{0}" to topic {1}'.format(channel, topic))
         thread = threading.Thread(
             target=constructor, 

@@ -30,7 +30,7 @@ def read_file(myfile):
         with open(myfile, 'r') as f:
             data = f.read()
         return data
-    except IOError as e:
+    except IOError:
         raise Exception('Unable to read file {0}'.format(myfile))
 
 def write_pid(mypath, pid):
@@ -49,7 +49,7 @@ def write_pid(mypath, pid):
     try:
         with open(mypath, 'w') as f:
             f.write('{0}'.format(pid))
-    except IOError as e:
+    except IOError:
         raise Exception('Unable to write pid {0} to file {1}'.format(pid, mypath))
 
 def rm_pid(mypath):
@@ -147,7 +147,7 @@ def set_logging(log_dict):
     loginfo = LogInfo(log_dict)
     logging.root.addHandler(loginfo.handler)
     logging.root.setLevel(loginfo.numeric_log_level)
-    logger = logging.getLogger('opz_ha')
+    # logger = logging.getLogger('opz_ha')
     # if log_dict['blacklist']:
     #     for bl_entry in ensure_list(log_dict['blacklist']):
     #         for handler in logging.root.handlers:

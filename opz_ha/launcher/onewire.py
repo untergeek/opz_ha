@@ -7,7 +7,7 @@ from opz_ha.utils    import check_config
 logger = logging.getLogger(__name__)
 
 def constructor(*a, **k):
-    ow = OneWire(*a, **k)
+    _ = OneWire(*a, **k)
 
 def launcher(mqttc, config):
     """

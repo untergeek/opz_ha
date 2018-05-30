@@ -8,7 +8,7 @@ from opz_ha.utils import check_config, get_mode
 logger = logging.getLogger(__name__)
 
 def constructor(*a, **k):
-    rs = GDORelay(*a, **k)
+    _ = GDORelay(*a, **k)
 
 def launcher(mqttc, modestring, config):
     """
@@ -26,9 +26,9 @@ def launcher(mqttc, modestring, config):
         raise ValueError('No gdo_relays found in configuration.')
     for relay in config['gdo_relays']:
         channel = check_config(relay, 'channel', msg='GPIO channel not configured for {0}'.format(relay))
-        topic   = check_config(relay, 'topic', default='{0}/{1}'.format(defaults.gdo_topic_base(), channel))
-        qos     = check_config(relay, 'qos', default=defaults.qos())
-        retain  = check_config(relay, 'retain', default=defaults.retain())
+        topic = check_config(relay, 'topic', default='{0}/{1}'.format(defaults.gdo_topic_base(), channel))
+        qos = check_config(relay, 'qos', default=defaults.qos())
+        retain = check_config(relay, 'retain', default=defaults.retain())
         logger.debug('Spawning thread to read topic {0} and issue commands to channel {1}'.format(topic, channel))
         thread = threading.Thread(
             target=constructor, 

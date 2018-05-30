@@ -2,12 +2,12 @@ import os
 import time
 import logging
 import click
+import sys
 import paho.mqtt.client as mqtt
+from opz_ha import __version__
 import opz_ha.defaults as defaults
 from opz_ha.launcher import gdorelay, onewire, reedswitch
-from opz_ha._version import __version__
-from opz_ha.utils    import TerminationCatcher, check_config, cleanup_channels, \
-                            process_config, rm_pid, write_pid
+from opz_ha.utils import TerminationCatcher, check_config, cleanup_channels, process_config, rm_pid, write_pid
 
 if not os.getegid() == 0:
     sys.exit('opz_ha must be run as root')
@@ -52,6 +52,8 @@ def run(config):
         mqttGDO.connect(host, port=port, keepalive=ka)
         logger.info('Starting GDORelay MQTT subscribe thread...')
         gdorelay.launcher(mqttGDO, mode, config)
+    else:
+        mqttGDO = None
     return mqttc, mqttGDO
 
 
@@ -91,8 +93,9 @@ def cli(configuration_file):
     # Stop both loops
     logger.info('Stopping publish client loop.')
     mqttc.loop_stop()
-    logger.info('Stopping GDO subscribe client loop.')
-    mqttGDO.loop_stop()
+    if mqttGDO:
+        logger.info('Stopping GDO subscribe client loop.')
+        mqttGDO.loop_stop()
     logger.info('OrangePi Zero GPIO/MQTT monitoring and publishing halted.')
     # Cleanup GPIO Channels
     logger.info('Cleanup OrangePi Zero GPIO Channels.')

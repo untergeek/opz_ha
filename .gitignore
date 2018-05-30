@@ -1,6 +1,7 @@
 .*.swp
 *~
 *.py[co]
+.vscode
 build
 dist
 scratch

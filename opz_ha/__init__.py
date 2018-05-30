@@ -1,0 +1,1 @@
+from opz_ha.version import __version__
