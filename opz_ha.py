@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """Wrapper for running opz_ha from source."""
 
@@ -6,6 +6,7 @@ from opz_ha.cli import cli
 
 if __name__ == '__main__':
     try:
+        # pylint: disable=E1120
         cli()
     except Exception as e:
         if type(e) == type(RuntimeError()):
